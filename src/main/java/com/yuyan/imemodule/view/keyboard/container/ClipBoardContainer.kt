@@ -77,18 +77,20 @@ class ClipBoardContainer(context: Context, inputView: InputView) : BaseContainer
             } else {
                 DataBaseKT.instance.phraseDao().getAll().map { line -> Clipboard(line.content) }.toMutableList()
             }
-        val manager =  when (AppPrefs.getInstance().clipboard.clipboardLayoutCompact.getValue()){
-            ClipboardLayoutMode.ListView ->  LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            ClipboardLayoutMode.GridView -> CustomGridLayoutManager(context, 2)
-            ClipboardLayoutMode.FlexboxView -> {
-                calculateColumn(copyContents)
-                CustomGridLayoutManager(context, 6).apply {
-                    spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                        override fun getSpanSize(i: Int) = mHashMapSymbols[i] ?: 1
-                    }
-                }
-            }
-        }
+        var manager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+
+//        val manager =  when (AppPrefs.getInstance().clipboard.clipboardLayoutCompact.getValue()){
+//            ClipboardLayoutMode.ListView ->  LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+//            ClipboardLayoutMode.GridView -> CustomGridLayoutManager(context, 2)
+//            ClipboardLayoutMode.FlexboxView -> {
+//                calculateColumn(copyContents)
+//                CustomGridLayoutManager(context, 6).apply {
+//                    spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+//                        override fun getSpanSize(i: Int) = mHashMapSymbols[i] ?: 1
+//                    }
+//                }
+//            }
+//        }
         mRVSymbolsView.setLayoutManager(manager)
         val viewParent = mTVLable?.parent
         if (viewParent != null) {

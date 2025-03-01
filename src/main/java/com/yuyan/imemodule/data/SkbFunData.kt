@@ -9,7 +9,7 @@ val menuSkbFunsPreset: Map<SkbMenuMode, SkbFunItem> = hashMapOf(
     SkbMenuMode.Emojicon to SkbFunItem(ImeSdkApplication.context.getString(R.string.emoji_setting), R.drawable.ic_menu_emoji, SkbMenuMode.Emojicon),
     SkbMenuMode.SwitchKeyboard to SkbFunItem(ImeSdkApplication.context.getString(R.string.changeKeyboard), R.drawable.ic_menu_keyboard, SkbMenuMode.SwitchKeyboard),
     SkbMenuMode.KeyboardHeight to SkbFunItem(ImeSdkApplication.context.getString(R.string.setting_ime_keyboard_height), R.drawable.ic_menu_height, SkbMenuMode.KeyboardHeight),
-    SkbMenuMode.ClipBoard to SkbFunItem(ImeSdkApplication.context.getString(R.string.clipboard), R.drawable.ic_menu_clipboard, SkbMenuMode.ClipBoard),
+    SkbMenuMode.ClipBoard to SkbFunItem(ImeSdkApplication.context.getString(R.string.clipboard), R.drawable.ic_menu_clipboard_ai, SkbMenuMode.ClipBoard),
     SkbMenuMode.Phrases to SkbFunItem(ImeSdkApplication.context.getString(R.string.phrases), R.drawable.ic_menu_phrases, SkbMenuMode.Phrases),
     SkbMenuMode.DarkTheme to SkbFunItem(ImeSdkApplication.context.getString(R.string.keyboard_theme_night), R.drawable.ic_menu_dark, SkbMenuMode.DarkTheme),
     SkbMenuMode.Feedback to SkbFunItem(ImeSdkApplication.context.getString(R.string.keyboard_feedback), R.drawable.ic_menu_touch, SkbMenuMode.Feedback),

@@ -214,7 +214,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         )
     }
 
-    inner class Clipboard : ManagedPreferenceCategory(R.string.clipboard, sharedPreferences) {
+    inner class Clipboard : ManagedPreferenceCategory(R.string.aiclipboard, sharedPreferences) {
         val clipboardListening = switch(R.string.clipboard_listening, "clipboard_enable", true)
         val clipboardHistoryLimit = int(
             R.string.clipboard_limit,
@@ -238,24 +238,24 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
             "秒"
         ) { clipboardListening.getValue() && clipboardSuggestion.getValue() }
 
-        val clipboardLayoutCompact = list(
-            R.string.clipboard_layout_compact_mode,
-            "clipboard_layout_mode",
-            ClipboardLayoutMode.ListView,
-            ClipboardLayoutMode,
-            listOf(
-                ClipboardLayoutMode.ListView,
-                ClipboardLayoutMode.GridView,
-                ClipboardLayoutMode.FlexboxView
-            ),
-            listOf(
-                R.string.clipboard_layout_mode_list,
-                R.string.clipboard_layout_mode_grid,
-                R.string.clipboard_layout_mode_flexbox
-            )
-        ) {
-            clipboardListening.getValue()
-        }
+//        val clipboardLayoutCompact = list(
+//            R.string.clipboard_layout_compact_mode,
+//            "clipboard_layout_mode",
+//            ClipboardLayoutMode.ListView,
+//            ClipboardLayoutMode,
+//            listOf(
+//                ClipboardLayoutMode.ListView,
+//                ClipboardLayoutMode.GridView,
+//                ClipboardLayoutMode.FlexboxView
+//            ),
+//            listOf(
+//                R.string.clipboard_layout_mode_list,
+//                R.string.clipboard_layout_mode_grid,
+//                R.string.clipboard_layout_mode_flexbox
+//            )
+//        ) {
+//            clipboardListening.getValue()
+//        }
     }
 
     private val providers = mutableListOf<ManagedPreferenceProvider>()

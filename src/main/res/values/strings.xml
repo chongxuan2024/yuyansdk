@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="ime_yuyan_name">语燕输入法</string>
-    <string name="ime_yuyan_name_debug">语燕输入D</string>
+    <string name="ime_yuyan_name_debug">AI辅助输入法</string>
     <!--设置页面-->
     <string name="setting_ime_sdk">输入法设置</string>
     <string name="setting_ime_input">输入设置</string>
@@ -69,6 +69,7 @@
     <string name="build_type_offline">离线版</string>
     <string name="build_type_online">联网版</string>
     <string name="clipboard">剪贴板</string>
+    <string name="aiclipboard">智能剪贴板</string>
     <string name="full_display_keyboard">全面屏键盘优化</string>
     <string name="keyboard_full_display_advanced_tip">多功能键盘</string>
     <string name="keyboard_full_display_normal_tip">普通键盘</string>

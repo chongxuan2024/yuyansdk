@@ -61,8 +61,8 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
                     R.id.action_settingsFragment_to_keyboardSettingFragment
                 )
                 addDestinationPreference(
-                    R.string.clipboard,
-                    R.drawable.ic_menu_clipboard,
+                    R.string.aiclipboard,
+                    R.drawable.ic_menu_clipboard_ai,
                     R.id.action_settingsFragment_to_clipboardSettingsFragment
                 )
 
@@ -72,23 +72,23 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
                     R.id.action_settingsFragment_to_fullDisplayKeyboardFragment
                 )
             }
-            addCategory(R.string.advanced) {
-                isIconSpaceReserved = false
-                addDestinationPreference(
-                    R.string.setting_ime_other,
-                    R.drawable.ic_menu_more_horiz,
-                    R.id.action_settingsFragment_to_otherSettingsFragment
-                )
-                addPreference(R.string.feedback,"",
-                    R.drawable.ic_menu_edit,) {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(CustomConstant.FEEDBACK_TXC_REPO)))
-                }
-                addDestinationPreference(
-                    R.string.about,
-                    R.drawable.ic_menu_feedback,
-                    R.id.action_settingsFragment_to_aboutFragment
-                )
-            }
+//            addCategory(R.string.advanced) {
+//                isIconSpaceReserved = false
+//                addDestinationPreference(
+//                    R.string.setting_ime_other,
+//                    R.drawable.ic_menu_more_horiz,
+//                    R.id.action_settingsFragment_to_otherSettingsFragment
+//                )
+//                addPreference(R.string.feedback,"",
+//                    R.drawable.ic_menu_edit,) {
+//                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(CustomConstant.FEEDBACK_TXC_REPO)))
+//                }
+//                addDestinationPreference(
+//                    R.string.about,
+//                    R.drawable.ic_menu_feedback,
+//                    R.id.action_settingsFragment_to_aboutFragment
+//                )
+//            }
         }
     }
 }

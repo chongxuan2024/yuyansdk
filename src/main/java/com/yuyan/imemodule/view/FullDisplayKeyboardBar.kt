@@ -73,7 +73,7 @@ class FullDisplayKeyboardBar(context: Context?, inputView: InputView) : LinearLa
        return when(keyMode){
             FullDisplayKeyMode.SwitchIme -> R.drawable.ic_menu_language
             FullDisplayKeyMode.SwitchLanguage -> R.drawable.ic_menu_keyboard_switcher
-           FullDisplayKeyMode.Clipboard -> R.drawable.ic_menu_clipboard
+           FullDisplayKeyMode.Clipboard -> R.drawable.ic_menu_clipboard_ai
            FullDisplayKeyMode.Phrases -> R.drawable.ic_menu_phrases
            else -> 0
        }

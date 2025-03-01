@@ -68,7 +68,8 @@ class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
         textColor = theme.keyTextColor
         mContext = context
         // 获取剪贴板布局模式设置
-        clipboardLayoutCompact = AppPrefs.getInstance().clipboard.clipboardLayoutCompact.getValue()
+//        clipboardLayoutCompact = AppPrefs.getInstance().clipboard.clipboardLayoutCompact.getValue()
+        clipboardLayoutCompact = ClipboardLayoutMode.ListView
     }
 
     // 创建ViewHolder
