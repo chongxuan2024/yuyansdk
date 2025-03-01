@@ -57,6 +57,10 @@
             android:name=".ui.auth.RegisterActivity"
             android:label="@string/register"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+        <activity
+            android:name=".ui.auth.UserProfileActivity"
+            android:label="@string/user_profile"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
     </application>
 
 </manifest>

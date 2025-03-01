@@ -3,6 +3,7 @@ package com.yuyan.imemodule.ui.fragment
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
@@ -17,6 +18,7 @@ import com.yuyan.imemodule.R
 import com.yuyan.imemodule.ui.utils.addCategory
 import com.yuyan.imemodule.ui.utils.addPreference
 import com.yuyan.imemodule.ui.auth.LoginActivity
+import com.yuyan.imemodule.ui.auth.UserProfileActivity
 
 class ImeSettingsFragment : PreferenceFragmentCompat() {
 
@@ -92,51 +94,62 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
 //                    R.id.action_settingsFragment_to_aboutFragment
 //                )
 //            }
-        }
 
-        // 添加账号设置分类
-        addPreferencesFromResource(R.xml.ime_settings_account)
-        
-        // 获取账号状态首选项
-        findPreference<Preference>("login_status")?.apply {
-            setOnPreferenceClickListener {
-                if (UserManager.isLoggedIn()) {
-                    // 如果已登录，显示退出登录对话框
-                    AlertDialog.Builder(requireContext())
-                        .setTitle(R.string.logout)
-                        .setMessage("确定要退出登录吗？")
-                        .setPositiveButton("确定") { _, _ ->
-                            UserManager.logout(requireContext())
-                            updateLoginStatus()
+            // 使用一致的方式添加账号设置分类
+            addCategory(R.string.account_settings) {
+                isIconSpaceReserved = false
+                addPreference(
+                    R.string.login_status,
+                    "",
+                    R.drawable.ic_menu_user
+                ) {
+                    try {
+                        if (UserManager.isLoggedIn()) {
+                            // 如果已登录，跳转到个人信息页面
+                            startActivity(Intent(requireContext(), UserProfileActivity::class.java))
+                        } else {
+                            // 如果未登录，跳转到登录页面
+                            startActivity(Intent(requireContext(), LoginActivity::class.java))
                         }
-                        .setNegativeButton("取消", null)
-                        .show()
-                } else {
-                    // 如果未登录，跳转到登录页面
-                    startActivity(Intent(requireContext(), LoginActivity::class.java))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(requireContext(), "操作失败，请稍后重试", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                true
+                // 初始化登录状态显示
+                try {
+                    findPreference<Preference>(getString(R.string.login_status))?.let {
+                        updateLoginStatusSummary(it)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
-
-        // 初始化登录状态显示
-        updateLoginStatus()
     }
 
     override fun onResume() {
         super.onResume()
         // 页面恢复时更新登录状态
-        updateLoginStatus()
+        try {
+            findPreference<Preference>(getString(R.string.login_status))?.let {
+                updateLoginStatusSummary(it)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    private fun updateLoginStatus() {
-        findPreference<Preference>("login_status")?.apply {
-            if (UserManager.isLoggedIn()) {
-                val user = UserManager.getCurrentUser()
-                summary = user?.username ?: "已登录"  // 显示用户名
+    private fun updateLoginStatusSummary(preference: Preference) {
+        try {
+            preference.summary = if (UserManager.isLoggedIn()) {
+                UserManager.getCurrentUser()?.username ?: getString(R.string.login)
             } else {
-                summary = "未登录"
+                getString(R.string.not_logged_in)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            preference.summary = getString(R.string.not_logged_in)
         }
     }
 }

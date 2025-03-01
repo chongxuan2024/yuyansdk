@@ -5,11 +5,13 @@
     <PreferenceCategory
         android:key="account_settings"
         android:title="@string/account_settings"
+        android:icon="@drawable/ic_sdk_launcher_ai_transparent"
         android:iconSpaceReserved="false">
 
         <Preference
             android:key="login_status"
             android:title="@string/login_status"
+            android:icon="@drawable/ic_sdk_launcher_ai_transparent"
             android:iconSpaceReserved="false"
             android:persistent="false" />
 
