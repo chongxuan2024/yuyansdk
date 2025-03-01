@@ -50,6 +50,8 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
+private const val AI_BUTTON_TEXT = "AI回复"
+
 /**
  * 剪切板界面适配器
  */
@@ -137,7 +139,7 @@ class ClipBoardAdapter(
         // 创建详情按钮
         val detailButton = Button(mContext).apply {
             id = View.generateViewId()
-            text = "AI回复"  // 按钮文字
+            text = AI_BUTTON_TEXT  // 按钮文字
             setTextColor(textColor)  // 使用与文本相同的颜色
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
@@ -169,7 +171,7 @@ class ClipBoardAdapter(
         mContainer.addView(viewIvYopTips)
         
         // 修改显示 AI 解答按钮的条件
-        if (UserManager.isLoggedIn() && subMode == SkbMenuMode.ClipBoard) {
+        if (UserManager.isLoggedIn() && mode == SkbMenuMode.ClipBoard) {
             mContainer.addView(detailButton)
         }
         
@@ -235,7 +237,7 @@ class ClipBoardAdapter(
             override fun onFailure(call: Call, e: IOException) {
                 mainHandler.post {
                     currentButton.isEnabled = true
-                    currentButton.text = "AI解答"
+                    currentButton.text = AI_BUTTON_TEXT
                     Toast.makeText(mContext, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -244,7 +246,7 @@ class ClipBoardAdapter(
                 val responseBody = response.body?.string()
                 mainHandler.post {
                     currentButton.isEnabled = true
-                    currentButton.text = "AI解答"
+                    currentButton.text = AI_BUTTON_TEXT
                     if (response.isSuccessful && responseBody != null) {
                         sendToInputBox(responseBody, holder)
                     } else {
