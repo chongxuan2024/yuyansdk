@@ -99,7 +99,7 @@ class ClipBoardContainer(context: Context, inputView: InputView) : BaseContainer
         if(copyContents.size == 0){
             this.addView(mTVLable, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
         }
-        val adapter = ClipBoardAdapter(context, copyContents)
+        val adapter = ClipBoardAdapter(context, copyContents, item)
         mRVSymbolsView.setAdapter(null)
         mRVSymbolsView.setOnItemClickListener{ _: View?, position: Int ->
             inputView.responseLongKeyEvent(Pair(PopupMenuMode.Text, copyContents[position].content))

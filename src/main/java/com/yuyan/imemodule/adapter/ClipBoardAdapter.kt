@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import com.yuyan.imemodule.service.ImeService
 import com.yuyan.imemodule.database.DataBaseKT
+import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -52,12 +53,17 @@ import java.io.IOException
 /**
  * 剪切板界面适配器
  */
-class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
-    RecyclerView.Adapter<ClipBoardAdapter.SymbolHolder>() {
+class ClipBoardAdapter(
+    context: Context, 
+    datas: MutableList<Clipboard>,
+    subMode: SkbMenuMode,
+) : RecyclerView.Adapter<ClipBoardAdapter.SymbolHolder>() {
     // 数据源列表
     private var mDatas : MutableList<Clipboard>
     // 上下文对象
     private val mContext: Context
+
+    private val subMode: SkbMenuMode
     // 文本颜色
     private var textColor: Int
     // 剪贴板布局模式
@@ -71,6 +77,7 @@ class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
     // 初始化块
     init {
         mDatas = datas
+        this.subMode = subMode
         // 获取当前主题
         val theme = activeTheme
         // 设置文本颜色
@@ -161,8 +168,8 @@ class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
         mContainer.addView(viewContext)
         mContainer.addView(viewIvYopTips)
         
-        // 只在用户登录时显示 AI 解答按钮
-        if (UserManager.isLoggedIn()) {
+        // 修改显示 AI 解答按钮的条件
+        if (UserManager.isLoggedIn() && subMode == SkbMenuMode.ClipBoard) {
             mContainer.addView(detailButton)
         }
         
