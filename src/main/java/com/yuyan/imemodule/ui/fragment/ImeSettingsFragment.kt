@@ -6,14 +6,17 @@ import android.os.Bundle
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.navigation.fragment.findNavController
+import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import com.yuyan.imemodule.BuildConfig
 import com.yuyan.imemodule.R
-import com.yuyan.imemodule.application.CustomConstant
 import com.yuyan.imemodule.ui.utils.addCategory
 import com.yuyan.imemodule.ui.utils.addPreference
+import com.yuyan.imemodule.ui.auth.LoginActivity
 
 class ImeSettingsFragment : PreferenceFragmentCompat() {
 
@@ -89,6 +92,51 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
 //                    R.id.action_settingsFragment_to_aboutFragment
 //                )
 //            }
+        }
+
+        // 添加账号设置分类
+        addPreferencesFromResource(R.xml.ime_settings_account)
+        
+        // 获取账号状态首选项
+        findPreference<Preference>("login_status")?.apply {
+            setOnPreferenceClickListener {
+                if (UserManager.isLoggedIn()) {
+                    // 如果已登录，显示退出登录对话框
+                    AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.logout)
+                        .setMessage("确定要退出登录吗？")
+                        .setPositiveButton("确定") { _, _ ->
+                            UserManager.logout(requireContext())
+                            updateLoginStatus()
+                        }
+                        .setNegativeButton("取消", null)
+                        .show()
+                } else {
+                    // 如果未登录，跳转到登录页面
+                    startActivity(Intent(requireContext(), LoginActivity::class.java))
+                }
+                true
+            }
+        }
+
+        // 初始化登录状态显示
+        updateLoginStatus()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 页面恢复时更新登录状态
+        updateLoginStatus()
+    }
+
+    private fun updateLoginStatus() {
+        findPreference<Preference>("login_status")?.apply {
+            if (UserManager.isLoggedIn()) {
+                val user = UserManager.getCurrentUser()
+                summary = user?.username ?: "已登录"  // 显示用户名
+            } else {
+                summary = "未登录"
+            }
         }
     }
 }

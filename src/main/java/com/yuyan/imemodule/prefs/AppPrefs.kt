@@ -1,4 +1,3 @@
-
 package com.yuyan.imemodule.prefs
 
 import android.content.SharedPreferences
@@ -17,6 +16,7 @@ import com.yuyan.imemodule.prefs.behavior.FullDisplayKeyMode
 import com.yuyan.imemodule.prefs.behavior.HalfWidthSymbolsMode
 import com.yuyan.imemodule.prefs.behavior.KeyboardOneHandedMod
 import com.yuyan.imemodule.utils.DevicesUtils
+
 
 
 class AppPrefs(private val sharedPreferences: SharedPreferences) {
@@ -258,6 +258,19 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
 //        }
     }
 
+    inner class Account : ManagedPreferenceCategory(R.string.account_settings, sharedPreferences) {
+        val loginStatus = switch(
+            R.string.login_status,
+            "login_status",
+            false
+        ) { UserManager.isLoggedIn() }
+
+//        val selectedAiModel = string(
+//            "selected_ai_model",
+//            "default"
+//        )
+    }
+
     private val providers = mutableListOf<ManagedPreferenceProvider>()
 
     fun <T : ManagedPreferenceProvider> registerProvider(
@@ -280,6 +293,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
     val clipboard = Clipboard().register()
     val keyboardSetting = KeyboardSetting().register()
     val other = Other().register()
+    val account = Account().register()
 
     private val onSharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -313,6 +327,9 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
                 it.value.putValueTo(this@edit)
             }
             other.managedPreferences.forEach {
+                it.value.putValueTo(this@edit)
+            }
+            account.managedPreferences.forEach {
                 it.value.putValueTo(this@edit)
             }
         }

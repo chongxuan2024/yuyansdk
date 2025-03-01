@@ -22,6 +22,7 @@ open class ImeSdkApplication : Application() {
         super.onCreate()
         mInstance = this
         initData()
+        UserManager.init(this)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

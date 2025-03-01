@@ -48,6 +48,15 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/cropper_library_file_paths"/>
         </provider>
+        <activity
+            android:name=".ui.auth.LoginActivity"
+            android:label="@string/login"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+        
+        <activity
+            android:name=".ui.auth.RegisterActivity"
+            android:label="@string/register"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
     </application>
 
 </manifest>

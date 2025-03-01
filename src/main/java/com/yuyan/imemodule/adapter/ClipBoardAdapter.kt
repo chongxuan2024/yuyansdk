@@ -39,6 +39,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import com.yuyan.imemodule.service.ImeService
 import com.yuyan.imemodule.database.DataBaseKT
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Callback
+import okhttp3.Call
+import okhttp3.Response
+import org.json.JSONObject
+import java.io.IOException
 
 /**
  * 剪切板界面适配器
@@ -151,8 +160,13 @@ class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
         // 将视图添加到容器中
         mContainer.addView(viewContext)
         mContainer.addView(viewIvYopTips)
-        mContainer.addView(detailButton)  // 添加详情按钮
-        return SymbolHolder(mContainer, detailButton)  // 修改这里传入button
+        
+        // 只在用户登录时显示 AI 解答按钮
+        if (UserManager.isLoggedIn()) {
+            mContainer.addView(detailButton)
+        }
+        
+        return SymbolHolder(mContainer, detailButton)
     }
 
     // 绑定数据到ViewHolder
@@ -189,41 +203,50 @@ class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
     private fun showContentDialog(content: String, holder: SymbolHolder) {
         val currentButton = holder.detailButton
         
+        if (!UserManager.isLoggedIn()) {
+            Toast.makeText(mContext, "请先登录", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
         currentButton.isEnabled = false
         currentButton.text = "思考中..."
 
-        scope.launch {
-            try {
-                delay(2000)
-                val response = mockAiResponse(content)
-                
+        val client = OkHttpClient()
+        val jsonBody = JSONObject().apply {
+            put("question", content)
+        }
+
+        val user = UserManager.getCurrentUser()!!
+        val request = Request.Builder()
+            .url("https://www.qingmiao.cloud/userapi/user/chat")
+            .addHeader("Authorization", user.token)
+            .addHeader("openid", user.username)
+            .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
                 mainHandler.post {
                     currentButton.isEnabled = true
                     currentButton.text = "AI解答"
-                    // 传入 holder 以更新对应的文本视图
-                    sendToInputBox(response, holder)
-                }
-            } catch (e: Exception) {
-                mainHandler.post {
-                    currentButton.isEnabled = true
-                    currentButton.text = "AI解答"
-                    Toast.makeText(mContext, "请求失败，请重试", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(mContext, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
-    }
 
-    // 模拟AI响应
-    private fun mockAiResponse(content: String): String {
-        // 这里可以根据输入内容生成一些模拟的响应
-        return when {
-            content.contains("?") || content.contains("？") -> 
-                "您问的问题是: $content\n我的回答是: 这是一个模拟的AI回答。"
-            content.length > 50 -> 
-                "这是一段较长文本的总结：${content.substring(0, 50)}..."
-            else -> 
-                "对于'$content'的分析结果是：这是一个测试回复。"
-        }
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                mainHandler.post {
+                    currentButton.isEnabled = true
+                    currentButton.text = "AI解答"
+                    if (response.isSuccessful && responseBody != null) {
+                        sendToInputBox(responseBody, holder)
+                    } else {
+                        Toast.makeText(mContext, "服务器响应错误: ${response.code}", 
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
     }
 
     // 获取数据项数量
