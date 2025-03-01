@@ -1,0 +1,67 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="192dp"
+    android:viewportWidth="192"
+    android:viewportHeight="192">
+
+    <!-- 圆形背景 - 添加透明度 -->
+    <path
+        android:fillColor="#2196F3"
+        android:fillAlpha="0.1"
+        android:pathData="M96,96m-96,0a96,96 0,1 1,192 0a96,96 0,1 1,-192 0"/>
+
+    <!-- 键盘轮廓 - 圆角矩形 -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M56,75L136,75C144,75 148,79 148,87L148,133C148,141 144,145 136,145L56,145C48,145 44,141 44,133L44,87C44,79 48,75 56,75Z"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="4"/>
+
+    <!-- AI 图形元素 - 神经网络连接点 -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M68,93L124,93M68,111L124,111M68,129L124,129"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"/>
+
+    <!-- 圆形连接点 -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M68,93C72,93 72,93 68,93M124,93C128,93 128,93 124,93M68,111C72,111 72,111 68,111M124,111C128,111 128,111 124,111M68,129C72,129 72,129 68,129M124,129C128,129 128,129 124,129"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="8"
+        android:strokeLineCap="round"/>
+
+    <!-- AI 文字 - 放大并加粗的版本 -->
+    <!-- A 字母 -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M72,60L86,32L100,60H72Z"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="4"/>
+    <!-- A 字母的横线 -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M78,50H94"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="4"/>
+    <!-- I 字母 -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M108,32L108,60"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="8"/>
+    <!-- I 字母的上下横线 -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M100,32L116,32M100,60L116,60"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="4"/>
+
+    <!-- Debug 标识 - 右下角弧形标记 -->
+    <path
+        android:fillColor="#FFD54F"
+        android:fillAlpha="0.8"
+        android:pathData="M152,152A96,96 0,0 1,134 152L152,134A96,96 0,0 1,152 152"/>
+</vector>
