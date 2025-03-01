@@ -118,7 +118,7 @@ class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
         // 创建内容文本视图
         val viewContext = EmojiTextView(mContext).apply {
             id = R.id.clipboard_adapter_content
-            maxLines = 3  // 最多显示3行
+            maxLines = 20  // 最多显示3行
             ellipsize = TextUtils.TruncateAt.END  // 超出显示省略号
             gravity = Gravity.CENTER
             layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
@@ -130,7 +130,7 @@ class ClipBoardAdapter(context: Context, datas: MutableList<Clipboard>) :
         // 创建详情按钮
         val detailButton = Button(mContext).apply {
             id = View.generateViewId()
-            text = "AI解答"  // 按钮文字
+            text = "AI回复"  // 按钮文字
             setTextColor(textColor)  // 使用与文本相同的颜色
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
