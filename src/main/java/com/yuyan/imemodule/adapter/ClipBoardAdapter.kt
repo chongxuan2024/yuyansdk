@@ -127,68 +127,117 @@ class ClipBoardAdapter(
         // 创建内容文本视图
         val viewContext = EmojiTextView(mContext).apply {
             id = R.id.clipboard_adapter_content
-            maxLines = 20  // 最多显示3行
-            ellipsize = TextUtils.TruncateAt.END  // 超出显示省略号
+            maxLines = 20
+            ellipsize = TextUtils.TruncateAt.END
             gravity = Gravity.CENTER
-            layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, 
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 margin = marginValue
-                addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+                addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE)
             }
         }
 
-        // 创建详情按钮
-        val detailButton = Button(mContext).apply {
+        // 创建按钮容器
+        val buttonContainer = LinearLayout(mContext).apply {
             id = View.generateViewId()
-            text = AI_BUTTON_TEXT  // 按钮文字
-            setTextColor(textColor)  // 使用与文本相同的颜色
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.END
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.BELOW, R.id.clipboard_adapter_content)
+                setMargins(dip2px(5), dip2px(5), dip2px(5), dip2px(5))
+            }
+        }
+
+        // 创建 AI 回复按钮
+        val detailButton = Button(mContext).apply {
+            text = AI_BUTTON_TEXT
+            setTextColor(textColor)
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
                 setShape(GradientDrawable.RECTANGLE)
                 setCornerRadius(ThemeManager.prefs.keyRadius.getValue().toFloat())
             }
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_END)
-                addRule(RelativeLayout.BELOW, R.id.clipboard_adapter_content)
-                setMargins(0, dip2px(5), dip2px(5), dip2px(5))
+                marginEnd = dip2px(5)
             }
         }
 
+        // 创建还原按钮
+        val restoreButton = Button(mContext).apply {
+            text = "还原"
+            visibility = View.GONE
+            setTextColor(textColor)
+            background = GradientDrawable().apply {
+                setColor(activeTheme.functionKeyBackgroundColor)
+                setShape(GradientDrawable.RECTANGLE)
+                setCornerRadius(ThemeManager.prefs.keyRadius.getValue().toFloat())
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        // 将按钮添加到按钮容器中
+        buttonContainer.addView(detailButton)
+        buttonContainer.addView(restoreButton)
+
+        // 将视图添加到主容器中
+        mContainer.addView(viewContext)
+        mContainer.addView(buttonContainer)
+        
         // 创建置顶图标视图
         val viewIvYopTips = ImageView(mContext).apply {
             id = R.id.clipboard_adapter_top_tips
             setImageResource(R.drawable.ic_baseline_top_tips_32)
-            layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, 
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE)
                 addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE)
             }
         }
-
-        // 将视图添加到容器中
-        mContainer.addView(viewContext)
-        mContainer.addView(viewIvYopTips)
         
-        // 修改显示 AI 解答按钮的条件
-        if (UserManager.isLoggedIn() && mode == SkbMenuMode.ClipBoard) {
-            mContainer.addView(detailButton)
+        // 将视图添加到主容器中
+        mContainer.addView(viewIvYopTips)  // 确保添加置顶图标
+        
+        // 修改显示按钮的条件
+        if (UserManager.isLoggedIn() && subMode == SkbMenuMode.ClipBoard) {
+            buttonContainer.visibility = View.VISIBLE
+        } else {
+            buttonContainer.visibility = View.GONE
         }
         
-        return SymbolHolder(mContainer, detailButton)
+        return SymbolHolder(mContainer, detailButton, restoreButton, viewIvYopTips)  // 传入置顶图标
     }
 
     // 绑定数据到ViewHolder
     override fun onBindViewHolder(holder: SymbolHolder, position: Int) {
         val data = mDatas[position]
-        // 设置内容文本,将换行符替换为\n显示
-        holder.textView.text = data.content.replace("\n", "\\n")
-        // 根据是否置顶显示或隐藏图标
-        holder.ivTopTips.visibility = if(data.isKeep == 1)View.VISIBLE else View.GONE
+        val originalContent = data.content  // 保存原始内容
         
-        // 设置按钮点击事件
+        // 设置内容文本
+        holder.textView.text = data.content.replace("\n", "\\n")
+        holder.ivTopTips.visibility = if(data.isKeep == 1) View.VISIBLE else View.GONE
+        
+        // AI 回复按钮点击事件
         holder.detailButton.setOnClickListener {
-            showContentDialog(data.content, holder)  // 传入 holder
+            showContentDialog(data.content, holder, originalContent)  // 传入原始内容
+        }
+
+        // 还原按钮点击事件
+        holder.restoreButton.setOnClickListener {
+            sendToInputBox(originalContent, holder)
+            holder.restoreButton.visibility = View.GONE  // 还原后隐藏按钮
         }
     }
 
@@ -209,7 +258,7 @@ class ClipBoardAdapter(
     }
 
     // 修改显示内容的方法
-    private fun showContentDialog(content: String, holder: SymbolHolder) {
+    private fun showContentDialog(content: String, holder: SymbolHolder, originalContent: String) {
         val currentButton = holder.detailButton
         
         if (!UserManager.isLoggedIn()) {
@@ -249,6 +298,7 @@ class ClipBoardAdapter(
                     currentButton.text = AI_BUTTON_TEXT
                     if (response.isSuccessful && responseBody != null) {
                         sendToInputBox(responseBody, holder)
+                        holder.restoreButton.visibility = View.VISIBLE  // 显示还原按钮
                     } else {
                         Toast.makeText(mContext, "服务器响应错误: ${response.code}", 
                             Toast.LENGTH_SHORT).show()
@@ -264,19 +314,20 @@ class ClipBoardAdapter(
     }
 
     // ViewHolder内部类
-    inner class SymbolHolder(view: RelativeLayout, button: Button) : RecyclerView.ViewHolder(view) {
+    inner class SymbolHolder(
+        view: RelativeLayout, 
+        button: Button,
+        val restoreButton: Button,
+        val ivTopTips: ImageView  // 添加置顶图标引用
+    ) : RecyclerView.ViewHolder(view) {
         var textView: TextView
-        var ivTopTips: ImageView
-        var detailButton: Button  // 添加按钮引用
-        
+        var detailButton: Button
+
         init {
-            // 初始化视图引用
             textView = view.findViewById(R.id.clipboard_adapter_content)
-            // 设置文本颜色和大小
             textView.setTextColor(textColor)
             textView.textSize = px2dip(EnvironmentSingleton.instance.candidateTextSize)
-            ivTopTips = view.findViewById(R.id.clipboard_adapter_top_tips)
-            detailButton = button  // 初始化按钮引用
+            detailButton = button
         }
     }
 }
