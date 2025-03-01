@@ -157,6 +157,10 @@ class ClipBoardAdapter(
         val detailButton = Button(mContext).apply {
             text = AI_BUTTON_TEXT
             setTextColor(textColor)
+            textSize = 12f  // 设置更小的文字大小
+            minHeight = 0   // 移除最小高度限制
+            minimumHeight = dip2px(32)  // 设置合适的按钮高度
+            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
                 setShape(GradientDrawable.RECTANGLE)
@@ -175,6 +179,10 @@ class ClipBoardAdapter(
             text = "还原"
             visibility = View.GONE
             setTextColor(textColor)
+            textSize = 12f  // 设置更小的文字大小
+            minHeight = 0   // 移除最小高度限制
+            minimumHeight = dip2px(32)  // 设置合适的按钮高度
+            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
                 setShape(GradientDrawable.RECTANGLE)
