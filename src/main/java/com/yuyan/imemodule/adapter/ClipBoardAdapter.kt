@@ -189,7 +189,7 @@ class ClipBoardAdapter(
         // 创建新会话按钮
         val newSessionButton = Button(mContext).apply {
             text = "新会话"
-            visibility = View.GONE
+            visibility = View.VISIBLE
             setTextColor(textColor)
             textSize = 12f  // 设置更小的文字大小
             minHeight = 0   // 移除最小高度限制
@@ -281,7 +281,7 @@ class ClipBoardAdapter(
         // 还原按钮点击事件
         holder.restoreButton.setOnClickListener {
             sendToInputBox(originalContent, holder)
-            holder.restoreButton.visibility = View.GONE  // 还原后隐藏按钮
+//            holder.restoreButton.visibility = View.GONE  // 还原后隐藏按钮
         }
     }
 
@@ -343,12 +343,17 @@ class ClipBoardAdapter(
                     currentButton.text = AI_BUTTON_TEXT
                     if (response.isSuccessful && responseBody != null) {
                         val jsonResponse = JSONObject(responseBody)
-                        println(jsonResponse)
-                            currentSessionId = jsonResponse.getString("session_id")
+                            println(jsonResponse)
+                        try {
+                            currentSessionId = jsonResponse.getString("sessionId")
                             sendToInputBox(jsonResponse.getString("text"), holder)
                             holder.restoreButton.visibility = View.VISIBLE
                             holder.newSessionButton.visibility = View.VISIBLE
                             holder.retryButton.visibility = View.VISIBLE
+                        } catch (e: Exception) {
+                            Toast.makeText(mContext, "响应解析错误: ${response.code}",
+                                Toast.LENGTH_SHORT).show()
+                        }
 
                     } else {
                         Toast.makeText(mContext, "服务器响应错误: ${response.code}",
@@ -396,8 +401,13 @@ class ClipBoardAdapter(
                     if (response.isSuccessful && responseBody != null) {
                         val jsonResponse = JSONObject(responseBody)
 
-                        currentSessionId = jsonResponse.getString("session_id")
-                        sendToInputBox(jsonResponse.getString("text"), holder)
+                        try {
+                            currentSessionId = jsonResponse.getString("sessionId")
+                            sendToInputBox(jsonResponse.getString("text"), holder)
+                        } catch (e: Exception) {
+                            Toast.makeText(mContext, "响应解析错误: ${response.code}",
+                                Toast.LENGTH_SHORT).show()
+                        }
 
                     } else {
                         Toast.makeText(mContext, "服务器响应错误: ${response.code}",
