@@ -19,6 +19,7 @@ import com.yuyan.imemodule.ui.utils.addCategory
 import com.yuyan.imemodule.ui.utils.addPreference
 import com.yuyan.imemodule.ui.auth.LoginActivity
 import com.yuyan.imemodule.ui.auth.UserProfileActivity
+import com.yuyan.imemodule.ui.knowledge.KnowledgeManagementActivity
 
 class ImeSettingsFragment : PreferenceFragmentCompat() {
 
@@ -116,6 +117,25 @@ class ImeSettingsFragment : PreferenceFragmentCompat() {
                         Toast.makeText(requireContext(), "操作失败，请稍后重试", Toast.LENGTH_SHORT).show()
                     }
                 }
+
+                // 添加个人知识库管理入口
+                addPreference(
+                    R.string.knowledge_management,
+                    "",
+                    R.drawable.ic_menu_knowledge
+                ) {
+                    try {
+                        if (UserManager.isLoggedIn()) {
+                            startActivity(Intent(requireContext(), KnowledgeManagementActivity::class.java))
+                        } else {
+                            Toast.makeText(requireContext(), "请先登录", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(requireContext(), "操作失败，请稍后重试", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
                 // 初始化登录状态显示
                 try {
                     findPreference<Preference>(getString(R.string.login_status))?.let {

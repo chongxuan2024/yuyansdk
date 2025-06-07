@@ -52,7 +52,7 @@
             android:name=".ui.auth.LoginActivity"
             android:label="@string/login"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
-        
+
         <activity
             android:name=".ui.auth.RegisterActivity"
             android:label="@string/register"
@@ -61,6 +61,10 @@
             android:name=".ui.auth.UserProfileActivity"
             android:label="@string/user_profile"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+        <activity
+                android:name=".ui.knowledge.KnowledgeManagementActivity"
+                android:label="@string/knowledge_management"
+                android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
     </application>
 
 </manifest>

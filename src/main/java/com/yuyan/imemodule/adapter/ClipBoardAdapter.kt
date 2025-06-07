@@ -7,10 +7,7 @@ import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.emoji2.widget.EmojiTextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +20,15 @@ import com.yuyan.imemodule.prefs.behavior.ClipboardLayoutMode
 import com.yuyan.imemodule.singleton.EnvironmentSingleton
 import com.yuyan.imemodule.utils.DevicesUtils.dip2px
 import com.yuyan.imemodule.utils.DevicesUtils.px2dip
+import com.yuyan.imemodule.service.ImeService
+import com.yuyan.imemodule.database.DataBaseKT
+import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.io.IOException
+import kotlinx.coroutines.*
 import splitties.views.dsl.core.margin
 import android.app.AlertDialog
 import android.widget.Button
@@ -33,22 +39,6 @@ import android.view.ViewGroup.LayoutParams
 import android.widget.PopupWindow
 import android.os.Handler
 import android.os.Looper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import com.yuyan.imemodule.service.ImeService
-import com.yuyan.imemodule.database.DataBaseKT
-import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.Callback
-import okhttp3.Call
-import okhttp3.Response
-import org.json.JSONObject
-import java.io.IOException
 
 private const val AI_BUTTON_TEXT = "AI回复"
 
@@ -56,7 +46,7 @@ private const val AI_BUTTON_TEXT = "AI回复"
  * 剪切板界面适配器
  */
 class ClipBoardAdapter(
-    context: Context, 
+    context: Context,
     datas: MutableList<Clipboard>,
     subMode: SkbMenuMode,
 ) : RecyclerView.Adapter<ClipBoardAdapter.SymbolHolder>() {
@@ -75,6 +65,8 @@ class ClipBoardAdapter(
     private val mainHandler = Handler(Looper.getMainLooper())
     // 添加协程作用域
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    private var currentSessionId: String? = null
 
     // 初始化块
     init {
@@ -98,7 +90,7 @@ class ClipBoardAdapter(
         mContainer.gravity = Gravity.CENTER_VERTICAL
         // 设置边距
         val marginValue = dip2px(3)
-        
+
         // 根据布局模式设置不同的布局参数
         when (clipboardLayoutCompact){
             // 列表视图模式
@@ -131,7 +123,7 @@ class ClipBoardAdapter(
             ellipsize = TextUtils.TruncateAt.END
             gravity = Gravity.CENTER
             layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT, 
+                RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
             ).apply {
                 margin = marginValue
@@ -194,49 +186,93 @@ class ClipBoardAdapter(
             )
         }
 
+        // 创建新会话按钮
+        val newSessionButton = Button(mContext).apply {
+            text = "新会话"
+            visibility = View.GONE
+            setTextColor(textColor)
+            textSize = 12f  // 设置更小的文字大小
+            minHeight = 0   // 移除最小高度限制
+            minimumHeight = dip2px(32)  // 设置合适的按钮高度
+            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
+            background = GradientDrawable().apply {
+                setColor(activeTheme.functionKeyBackgroundColor)
+                setShape(GradientDrawable.RECTANGLE)
+                setCornerRadius(ThemeManager.prefs.keyRadius.getValue().toFloat())
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginEnd = dip2px(5)
+            }
+        }
+
+        // 创建重试按钮
+        val retryButton = Button(mContext).apply {
+            text = "重试"
+            visibility = View.GONE
+            setTextColor(textColor)
+            textSize = 12f  // 设置更小的文字大小
+            minHeight = 0   // 移除最小高度限制
+            minimumHeight = dip2px(32)  // 设置合适的按钮高度
+            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
+            background = GradientDrawable().apply {
+                setColor(activeTheme.functionKeyBackgroundColor)
+                setShape(GradientDrawable.RECTANGLE)
+                setCornerRadius(ThemeManager.prefs.keyRadius.getValue().toFloat())
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
         // 将按钮添加到按钮容器中
         buttonContainer.addView(detailButton)
         buttonContainer.addView(restoreButton)
+        buttonContainer.addView(newSessionButton)
+        buttonContainer.addView(retryButton)
 
         // 将视图添加到主容器中
         mContainer.addView(viewContext)
         mContainer.addView(buttonContainer)
-        
+
         // 创建置顶图标视图
         val viewIvYopTips = ImageView(mContext).apply {
             id = R.id.clipboard_adapter_top_tips
             setImageResource(R.drawable.ic_baseline_top_tips_32)
             layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT, 
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
             ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE)
                 addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE)
             }
         }
-        
+
         // 将视图添加到主容器中
         mContainer.addView(viewIvYopTips)  // 确保添加置顶图标
-        
+
         // 修改显示按钮的条件
         if (UserManager.isLoggedIn() && subMode == SkbMenuMode.ClipBoard) {
             buttonContainer.visibility = View.VISIBLE
         } else {
             buttonContainer.visibility = View.GONE
         }
-        
-        return SymbolHolder(mContainer, detailButton, restoreButton, viewIvYopTips)  // 传入置顶图标
+
+        return SymbolHolder(mContainer, detailButton, restoreButton, viewIvYopTips, newSessionButton, retryButton)  // 传入置顶图标
     }
 
     // 绑定数据到ViewHolder
     override fun onBindViewHolder(holder: SymbolHolder, position: Int) {
         val data = mDatas[position]
         val originalContent = data.content  // 保存原始内容
-        
+
         // 设置内容文本
         holder.textView.text = data.content.replace("\n", "\\n")
         holder.ivTopTips.visibility = if(data.isKeep == 1) View.VISIBLE else View.GONE
-        
+
         // AI 回复按钮点击事件
         holder.detailButton.setOnClickListener {
             showContentDialog(data.content, holder, originalContent)  // 传入原始内容
@@ -253,7 +289,7 @@ class ClipBoardAdapter(
     private fun sendToInputBox(text: String, holder: SymbolHolder) {
         // 直接更新文本视图的内容
         holder.textView.text = text
-        
+
         // 同时更新数据源中的内容
         val position = holder.adapterPosition
         if (position != RecyclerView.NO_POSITION) {
@@ -268,23 +304,24 @@ class ClipBoardAdapter(
     // 修改显示内容的方法
     private fun showContentDialog(content: String, holder: SymbolHolder, originalContent: String) {
         val currentButton = holder.detailButton
-        
+
         if (!UserManager.isLoggedIn()) {
             Toast.makeText(mContext, "请先登录", Toast.LENGTH_SHORT).show()
             return
         }
-        
+
         currentButton.isEnabled = false
         currentButton.text = "思考中..."
 
         val client = OkHttpClient()
         val jsonBody = JSONObject().apply {
             put("question", content)
+            put("lastSessionId", currentSessionId)
         }
 
         val user = UserManager.getCurrentUser()!!
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/user/chat")
+            .url("https://www.qingmiao.cloud/userapi/user/chatNew")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
             .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
@@ -305,10 +342,65 @@ class ClipBoardAdapter(
                     currentButton.isEnabled = true
                     currentButton.text = AI_BUTTON_TEXT
                     if (response.isSuccessful && responseBody != null) {
-                        sendToInputBox(responseBody, holder)
-                        holder.restoreButton.visibility = View.VISIBLE  // 显示还原按钮
+                        val jsonResponse = JSONObject(responseBody)
+                        println(jsonResponse)
+                            currentSessionId = jsonResponse.getString("session_id")
+                            sendToInputBox(jsonResponse.getString("text"), holder)
+                            holder.restoreButton.visibility = View.VISIBLE
+                            holder.newSessionButton.visibility = View.VISIBLE
+                            holder.retryButton.visibility = View.VISIBLE
+
                     } else {
-                        Toast.makeText(mContext, "服务器响应错误: ${response.code}", 
+                        Toast.makeText(mContext, "服务器响应错误: ${response.code}",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
+    }
+
+    // 清除会话
+    private fun clearSession(holder: SymbolHolder) {
+        currentSessionId == null;
+        Toast.makeText(mContext, "已开始新会话", Toast.LENGTH_SHORT).show();
+
+    }
+
+    // 重试回答
+    private fun retryAnswer(content: String, holder: SymbolHolder) {
+
+        val client = OkHttpClient()
+        val jsonBody = JSONObject().apply {
+            put("question", "答案不满意，请重新检索知识库，提供更加准确的答案")
+            put("lastSessionId", currentSessionId)
+        }
+
+        val user = UserManager.getCurrentUser()!!
+        val request = Request.Builder()
+            .url("https://www.qingmiao.cloud/userapi/user/chatNew")
+            .addHeader("Authorization", user.token)
+            .addHeader("openid", user.username)
+            .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                mainHandler.post {
+                    Toast.makeText(mContext, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                mainHandler.post {
+                    if (response.isSuccessful && responseBody != null) {
+                        val jsonResponse = JSONObject(responseBody)
+
+                        currentSessionId = jsonResponse.getString("session_id")
+                        sendToInputBox(jsonResponse.getString("text"), holder)
+
+                    } else {
+                        Toast.makeText(mContext, "服务器响应错误: ${response.code}",
                             Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -323,10 +415,12 @@ class ClipBoardAdapter(
 
     // ViewHolder内部类
     inner class SymbolHolder(
-        view: RelativeLayout, 
+        view: RelativeLayout,
         button: Button,
         val restoreButton: Button,
-        val ivTopTips: ImageView  // 添加置顶图标引用
+        val ivTopTips: ImageView,
+        val newSessionButton: Button,  // 新增新会话按钮
+        val retryButton: Button        // 新增重试按钮
     ) : RecyclerView.ViewHolder(view) {
         var textView: TextView
         var detailButton: Button
@@ -336,6 +430,16 @@ class ClipBoardAdapter(
             textView.setTextColor(textColor)
             textView.textSize = px2dip(EnvironmentSingleton.instance.candidateTextSize)
             detailButton = button
+
+            // 设置新会话按钮点击事件
+            newSessionButton.setOnClickListener {
+                clearSession(this)
+            }
+
+            // 设置重试按钮点击事件
+            retryButton.setOnClickListener {
+                retryAnswer(textView.text.toString(), this)
+            }
         }
     }
 }
