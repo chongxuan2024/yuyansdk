@@ -1,5 +1,6 @@
 package com.yuyan.imemodule.view.keyboard
 
+import android.content.Intent
 import com.yuyan.imemodule.application.CustomConstant
 import com.yuyan.imemodule.application.ImeSdkApplication
 import com.yuyan.imemodule.data.flower.FlowerTypefaceMode
@@ -9,6 +10,7 @@ import com.yuyan.imemodule.prefs.AppPrefs
 import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
 import com.yuyan.imemodule.prefs.behavior.SymbolMode
 import com.yuyan.imemodule.singleton.EnvironmentSingleton
+import com.yuyan.imemodule.ui.knowledge.KnowledgeManagementActivity
 import com.yuyan.imemodule.ui.utils.AppUtil
 import com.yuyan.imemodule.utils.KeyboardLoaderUtil
 import com.yuyan.imemodule.view.keyboard.container.CandidatesContainer
@@ -45,6 +47,9 @@ fun onSettingsMenuClick(inputView: InputView, skbMenuMode: SkbMenuMode) {
         }
         SkbMenuMode.Feedback -> {
             AppUtil.launchSettingsToKeyboard(ImeSdkApplication.context)
+        }
+        SkbMenuMode.Knowledge->{
+            AppUtil.lauchknowledge(ImeSdkApplication.context)
         }
         SkbMenuMode.NumberRow -> {
             val abcNumberLine = AppPrefs.getInstance().keyboardSetting.abcNumberLine.getValue()

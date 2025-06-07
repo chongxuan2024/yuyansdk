@@ -9,6 +9,7 @@ import androidx.annotation.IdRes
 import androidx.navigation.NavDeepLinkBuilder
 import com.yuyan.imemodule.R
 import com.yuyan.imemodule.ui.activity.SettingsActivity
+import com.yuyan.imemodule.ui.knowledge.KnowledgeManagementActivity
 import kotlin.system.exitProcess
 
 object AppUtil {
@@ -18,6 +19,14 @@ object AppUtil {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
         }
     }
+
+    fun lauchknowledge(context: Context){
+        context.startActivity<KnowledgeManagementActivity> {
+           addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+        }
+    }
+
+
 
     private fun launchMainToDest(context: Context, @IdRes dest: Int, arguments: Bundle? = null) {
         NavDeepLinkBuilder(context)

@@ -218,5 +218,5 @@
     <string name="email_not_set">未设置</string>
     <string name="user_profile">个人信息</string>
 
-    <string name="knowledge_management">个人知识库管理</string>
+    <string name="knowledge_management">知识库</string>
 </resources>
