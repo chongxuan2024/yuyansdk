@@ -79,11 +79,6 @@ android {
             jniLibs.srcDirs = ['libs', "src/offline/libs"]
             manifest.srcFile('src/offline/AndroidManifest.xml')
         }
-        // online 在线版本
-        online {
-            jniLibs.srcDirs = ['libs', "src/online/libs"]
-            manifest.srcFile('src/online/AndroidManifest.xml')
-        }
     }
 
     //第三方库使用java1.8
