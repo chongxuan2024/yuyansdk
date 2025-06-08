@@ -48,6 +48,10 @@ android {
         buildConfigField "String", "AppBuildTime", "\"${getAppBuildTime()}\""
     }
 
+    buildTypes.all {
+        matchingFallbacks = ['release']
+    }
+
     //多渠道打包: app中多渠道配置要一致
     flavorDimensions = ["default"]
     productFlavors {
