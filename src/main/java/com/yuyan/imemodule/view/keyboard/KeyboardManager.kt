@@ -1,18 +1,10 @@
 package com.yuyan.imemodule.view.keyboard
 
+import android.content.Context
+import android.view.ViewGroup
 import com.yuyan.imemodule.application.ImeSdkApplication
 import com.yuyan.imemodule.manager.InputModeSwitcherManager
-import com.yuyan.imemodule.view.keyboard.container.BaseContainer
-import com.yuyan.imemodule.view.keyboard.container.CandidatesContainer
-import com.yuyan.imemodule.view.keyboard.container.ClipBoardContainer
-import com.yuyan.imemodule.view.keyboard.container.HandwritingContainer
-import com.yuyan.imemodule.view.keyboard.container.InputBaseContainer
-import com.yuyan.imemodule.view.keyboard.container.InputViewParent
-import com.yuyan.imemodule.view.keyboard.container.NumberContainer
-import com.yuyan.imemodule.view.keyboard.container.QwertyContainer
-import com.yuyan.imemodule.view.keyboard.container.SettingsContainer
-import com.yuyan.imemodule.view.keyboard.container.SymbolContainer
-import com.yuyan.imemodule.view.keyboard.container.T9TextContainer
+import com.yuyan.imemodule.view.keyboard.container.*
 
 /**
  * 键盘显示管理类
@@ -41,11 +33,12 @@ class KeyboardManager {
 
     fun switchKeyboard(layout: Int) {
         val keyboardName = when (layout) {
-            0x1000 -> KeyboardType.QWERTY
-            0x4000 -> KeyboardType.QWERTYABC
-            0x3000 -> KeyboardType.HANDWRITING
-            0x5000 -> KeyboardType.NUMBER
-            0x6000 -> KeyboardType.LX17
+            InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_PINYIN -> KeyboardType.QWERTY
+            InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_ABC -> KeyboardType.QWERTYABC
+            InputModeSwitcherManager.MASK_SKB_LAYOUT_HANDWRITING -> KeyboardType.HANDWRITING
+            InputModeSwitcherManager.MASK_SKB_LAYOUT_NUMBER -> KeyboardType.NUMBER
+            InputModeSwitcherManager.MASK_SKB_LAYOUT_LX17 -> KeyboardType.LX17
+            0x7000 -> KeyboardType.ClipBoard // 使用固定值替代clipboardLayout
             else -> KeyboardType.T9
         }
         switchKeyboard(keyboardName)
@@ -65,7 +58,7 @@ class KeyboardManager {
                 KeyboardType.SYMBOL -> SymbolContainer(ImeSdkApplication.context, mInputView)
                 KeyboardType.QWERTYABC -> QwertyContainer(ImeSdkApplication.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_ABC)
                 KeyboardType.LX17 -> QwertyContainer(ImeSdkApplication.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_LX17)
-                KeyboardType.ClipBoard -> ClipBoardContainer(ImeSdkApplication.context, mInputView)
+                KeyboardType.ClipBoard -> ClipBoardContainer(ImeSdkApplication.context, mInputView) as BaseContainer
                 else ->  T9TextContainer(ImeSdkApplication.context, mInputView)
             }
             container.updateSkbLayout()
@@ -80,14 +73,8 @@ class KeyboardManager {
         get() = currentContainer is InputBaseContainer
 
     companion object {
-        private var mInstance: KeyboardManager? = null
-        @JvmStatic
-        val instance: KeyboardManager
-            get() {
-                if (null == mInstance) {
-                    mInstance = KeyboardManager()
-                }
-                return mInstance!!
-            }
+        val instance: KeyboardManager by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+            KeyboardManager()
+        }
     }
 }

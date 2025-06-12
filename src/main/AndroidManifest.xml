@@ -62,9 +62,13 @@
             android:label="@string/user_profile"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
         <activity
-                android:name=".ui.knowledge.KnowledgeManagementActivity"
-                android:label="@string/knowledge_management"
-                android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+            android:name=".ui.knowledge.KnowledgeManagementActivity"
+            android:label="@string/knowledge_management"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity
+            android:name=".ui.knowledge.KnowledgeDetailActivity"
+            android:label="@string/knowledge_detail"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
 
 </manifest>

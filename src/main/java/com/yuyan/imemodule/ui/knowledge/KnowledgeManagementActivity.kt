@@ -5,10 +5,18 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.view.LayoutInflater
+import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.tabs.TabLayoutMediator
+import com.yuyan.imemodule.R
+import com.yuyan.imemodule.data.model.*
 import com.yuyan.imemodule.databinding.ActivityKnowledgeManagementBinding
+import com.yuyan.imemodule.databinding.DialogAddKnowledgeBaseBinding
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -30,9 +38,40 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         binding = ActivityKnowledgeManagementBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupToolbar()
+        setupViewPager()
+        setupFab()
         setupRecyclerView()
-        setupClickListeners()
         loadKnowledgeList()
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    private fun setupViewPager() {
+        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount() = 2
+
+            override fun createFragment(position: Int) = when (position) {
+                0 -> KnowledgeListFragment.newInstance(isAdmin = true)
+                else -> KnowledgeListFragment.newInstance(isAdmin = false)
+            }
+        }
+
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "我的知识库"
+                else -> "已授权知识库"
+            }
+        }.attach()
+    }
+
+    private fun setupFab() {
+        binding.fabAdd.setOnClickListener {
+            showAddKnowledgeBaseDialog()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -40,157 +79,94 @@ class KnowledgeManagementActivity : AppCompatActivity() {
             onDeleteClick = { fileId -> deleteKnowledge(fileId) },
             onRefreshStatus = { fileId -> checkFileStatus(fileId) }
         )
-        binding.rvKnowledgeList.apply {
-            layoutManager = LinearLayoutManager(this@KnowledgeManagementActivity)
-            adapter = this@KnowledgeManagementActivity.adapter
-        }
+        binding.viewPager.adapter = adapter
     }
 
-    private fun setupClickListeners() {
-        binding.btnRefresh.setOnClickListener {
-            loadKnowledgeList()
-        }
-
-        binding.btnUploadText.setOnClickListener {
-            showTextInputDialog()
-        }
-
-        binding.btnUploadFile.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "*/*"
-                addCategory(Intent.CATEGORY_OPENABLE)
+    private fun showAddKnowledgeBaseDialog() {
+        val dialogBinding = DialogAddKnowledgeBaseBinding.inflate(LayoutInflater.from(this))
+        
+        // 设置模板选项
+        val templates = TemplateType.values().map { 
+            when (it) {
+                TemplateType.PERSONAL_CHAT -> "个人聊天"
+                TemplateType.PRODUCT_SUPPORT -> "产品答疑"
+                TemplateType.CUSTOMER_SERVICE -> "售后服务"
+                TemplateType.CUSTOM -> "自定义"
             }
-            startActivityForResult(intent, PICK_FILE_REQUEST)
         }
-    }
+        dialogBinding.spinnerTemplate.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            templates
+        )
 
-    private fun showTextInputDialog() {
-        val dialog = TextInputDialog(this)
-        dialog.setOnTextSubmitted { text ->
-            uploadText(text)
-        }
-        dialog.show()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_FILE_REQUEST && resultCode == Activity.RESULT_OK) {
-            data?.data?.let { uri ->
-                val fileName = getFileName(uri)
-                if (isValidFileType(fileName)) {
-                    uploadFile(uri, fileName)
-                } else {
-                    Toast.makeText(this, "不支持的文件类型", Toast.LENGTH_SHORT).show()
+        AlertDialog.Builder(this)
+            .setTitle("创建知识库")
+            .setView(dialogBinding.root)
+            .setPositiveButton("确定") { _, _ ->
+                val name = dialogBinding.etName.text.toString()
+                if (name.isBlank()) {
+                    Toast.makeText(this, "请输入知识库名称", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
                 }
-            }
-        }
-    }
 
-    private fun isValidFileType(fileName: String): Boolean {
-        val validExtensions = listOf(".txt", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx")
-        return validExtensions.any { fileName.lowercase().endsWith(it) }
-    }
-
-    private fun getFileName(uri: Uri): String {
-        var fileName = ""
-        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (index != -1) {
-                    fileName = cursor.getString(index)
-                }
-            }
-        }
-        return fileName
-    }
-
-    private fun uploadText(text: String) {
-        val user = UserManager.getCurrentUser() ?: return
-
-        val requestBody = FormBody.Builder()
-            .add("text", text)
-            .build()
-
-        val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/user/text")
-            .addHeader("Authorization", user.token)
-            .addHeader("openid", user.username)
-            .post(requestBody)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@KnowledgeManagementActivity, "上传失败", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseBody = response.body?.string()
-                runOnUiThread {
-                    if (response.isSuccessful && responseBody != null) {
-                        val jsonResponse = JSONObject(responseBody)
-                        if (jsonResponse.getBoolean("success")) {
-                            Toast.makeText(this@KnowledgeManagementActivity, "上传成功", Toast.LENGTH_SHORT).show()
-                            loadKnowledgeList()
-                        } else {
-                            Toast.makeText(this@KnowledgeManagementActivity, 
-                                jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(this@KnowledgeManagementActivity, "上传失败", Toast.LENGTH_SHORT).show()
+                val paymentType = when (dialogBinding.rgPaymentType.checkedRadioButtonId) {
+                    R.id.rbUserPaid -> PaymentType.USER_PAID
+                    R.id.rbEnterprisePaid -> PaymentType.ENTERPRISE_PAID
+                    else -> {
+                        Toast.makeText(this, "请选择付费类型", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
                     }
                 }
+
+                val templateType = TemplateType.values()[dialogBinding.spinnerTemplate.selectedItemPosition]
+                createKnowledgeBase(name, paymentType, templateType)
             }
-        })
+            .setNegativeButton("取消", null)
+            .show()
     }
 
-    private fun uploadFile(uri: Uri, fileName: String) {
+    private fun createKnowledgeBase(name: String, paymentType: PaymentType, templateType: TemplateType) {
         val user = UserManager.getCurrentUser() ?: return
 
-        // 创建临时文件
-        val tempFile = File(cacheDir, fileName)
-        contentResolver.openInputStream(uri)?.use { input ->
-            FileOutputStream(tempFile).use { output ->
-                input.copyTo(output)
-            }
+        val jsonBody = JSONObject().apply {
+            put("name", name)
+            put("paymentType", paymentType.name)
+            put("templateType", templateType.name)
         }
 
-        val requestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("file", fileName, tempFile.asRequestBody("application/octet-stream".toMediaType()))
-            .build()
-
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/user/file")
+            .url("https://www.qingmiao.cloud/userapi/knowledge/create")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
-            .post(requestBody)
+            .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
             .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
-                    Toast.makeText(this@KnowledgeManagementActivity, "上传失败", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@KnowledgeManagementActivity, 
+                        "创建失败: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-                tempFile.delete()
             }
 
             override fun onResponse(call: Call, response: Response) {
-                tempFile.delete()
                 val responseBody = response.body?.string()
                 runOnUiThread {
                     if (response.isSuccessful && responseBody != null) {
                         val jsonResponse = JSONObject(responseBody)
                         if (jsonResponse.getBoolean("success")) {
-                            Toast.makeText(this@KnowledgeManagementActivity, "上传成功", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@KnowledgeManagementActivity,
+                                "创建成功", Toast.LENGTH_SHORT).show()
+                            // 刷新列表
                             loadKnowledgeList()
                         } else {
-                            Toast.makeText(this@KnowledgeManagementActivity, 
+                            Toast.makeText(this@KnowledgeManagementActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(this@KnowledgeManagementActivity, "上传失败", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@KnowledgeManagementActivity,
+                            "创建失败", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -198,53 +174,10 @@ class KnowledgeManagementActivity : AppCompatActivity() {
     }
 
     private fun loadKnowledgeList() {
-        val user = UserManager.getCurrentUser() ?: return
-
-        val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/user/listFile")
-            .addHeader("Authorization", user.token)
-            .addHeader("openid", user.username)
-            .post(FormBody.Builder().build())
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@KnowledgeManagementActivity, "获取列表失败", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseBody = response.body?.string()
-                runOnUiThread {
-                    if (response.isSuccessful && responseBody != null) {
-                        val jsonResponse = JSONObject(responseBody)
-                        if (jsonResponse.getBoolean("success")) {
-                            val dataArray = jsonResponse.getJSONArray("data")
-                            val knowledgeItems = mutableListOf<KnowledgeItem>()
-                            
-                            for (i in 0 until dataArray.length()) {
-                                val taskObject = dataArray.getJSONObject(i)
-                                knowledgeItems.add(
-                                    KnowledgeItem(
-                                        fileId = taskObject.getString("fileId"),
-                                        fileName = taskObject.optString("description", "未命名文件"),
-                                        status = taskObject.getString("fileParseStatus"),
-                                        description = taskObject.optString("description", "")
-                                    )
-                                )
-                            }
-                            adapter.updateItems(knowledgeItems)
-                        } else {
-                            Toast.makeText(this@KnowledgeManagementActivity, 
-                                jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(this@KnowledgeManagementActivity, "获取列表失败", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        })
+        // 刷新当前页面
+        binding.viewPager.post {
+            binding.viewPager.adapter?.notifyDataSetChanged()
+        }
     }
 
     private fun deleteKnowledge(fileId: String) {
