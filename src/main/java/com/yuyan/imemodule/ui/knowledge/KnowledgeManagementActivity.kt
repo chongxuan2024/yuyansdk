@@ -132,7 +132,7 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         val jsonBody = JSONObject().apply {
             put("name", name)
             put("paymentType", paymentType.name)
-            put("templateType", templateType.name)
+            put("aiTemplate", templateType.name)
         }
 
         val request = Request.Builder()
