@@ -221,4 +221,5 @@
     <string name="app_name">YuyanIME</string>
     <string name="knowledge_detail">知识库详情</string>
     <string name="clipboard_empty_ltip">剪贴板为空</string>
+    <string name="knowledge_member">成员管理</string>
 </resources>

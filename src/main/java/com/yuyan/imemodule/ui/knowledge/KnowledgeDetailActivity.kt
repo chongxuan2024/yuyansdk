@@ -40,7 +40,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         private const val EXTRA_IS_ADMIN = "is_admin"
         private const val REQUEST_PICK_FILE = 1
         private const val EXTRA_KNOWLEDGE_BASE_ID = "extra_knowledge_base_id"
-        private const val MENU_UPLOAD = Menu.FIRST + 1
+        private const val MENU_MEMBER = Menu.FIRST + 1
 
         fun createIntent(context: Context, knowledgeId: String, isAdmin: Boolean): Intent {
             return Intent(context, KnowledgeDetailActivity::class.java).apply {
@@ -60,6 +60,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
         setupToolbar()
         setupRecyclerView()
+        setupFab()
         loadDocuments()
     }
 
@@ -68,9 +69,15 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    private fun setupFab() {
+        binding.fabAdd.setOnClickListener {
+            showUploadDialog()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (isAdmin) {
-            menu.add(Menu.NONE, MENU_UPLOAD, Menu.NONE, "上传文件")
+            menu.add(Menu.NONE, MENU_MEMBER, Menu.NONE, "成员管理")
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
         return true
@@ -82,16 +89,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                 finish()
                 true
             }
-            MENU_UPLOAD -> {
-                showUploadDialog()
-                true
-            }
-            R.id.action_add_member -> {
-                showAddMemberDialog()
-                true
-            }
-            R.id.action_bill -> {
-                showBillDialog()
+            MENU_MEMBER -> {
+                showMemberManagement()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -181,69 +180,9 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         })
     }
 
-    private fun showAddMemberDialog() {
-        val input = EditText(this).apply {
-            hint = "请输入用户名"
-            inputType = InputType.TYPE_CLASS_TEXT
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("添加成员")
-            .setView(input)
-            .setPositiveButton("确定") { _, _ ->
-                val username = input.text.toString()
-                if (username.isNotBlank()) {
-                    addMember(username)
-                }
-            }
-            .setNegativeButton("取消", null)
-            .show()
-    }
-
-    private fun addMember(username: String) {
-        val user = UserManager.getCurrentUser() ?: return
-
-        val jsonBody = JSONObject().apply {
-            put("knowledgeId", knowledgeId)
-            put("username", username)
-            put("role", Role.USER.name)
-        }
-
-        val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/knowledge/addMember")
-            .addHeader("Authorization", user.token)
-            .addHeader("openid", user.username)
-            .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@KnowledgeDetailActivity,
-                        "添加失败: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseBody = response.body?.string()
-                runOnUiThread {
-                    if (response.isSuccessful && responseBody != null) {
-                        val jsonResponse = JSONObject(responseBody)
-                        if (jsonResponse.getBoolean("success")) {
-                            Toast.makeText(this@KnowledgeDetailActivity,
-                                "添加成功", Toast.LENGTH_SHORT).show()
-                            loadDocuments()
-                        } else {
-                            Toast.makeText(this@KnowledgeDetailActivity,
-                                jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(this@KnowledgeDetailActivity,
-                            "添加失败", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        })
+    private fun showMemberManagement() {
+        val intent = KnowledgeMemberActivity.createIntent(this, knowledgeId, isAdmin)
+        startActivity(intent)
     }
 
     private fun showUploadDialog() {
@@ -484,9 +423,5 @@ class KnowledgeDetailActivity : AppCompatActivity() {
             }
         }
         return fileName
-    }
-
-    private fun showBillDialog() {
-        // TODO: 实现账单查看功能
     }
 } 

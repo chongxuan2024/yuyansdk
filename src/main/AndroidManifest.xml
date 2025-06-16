@@ -69,6 +69,10 @@
             android:name=".ui.knowledge.KnowledgeDetailActivity"
             android:label="@string/knowledge_detail"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+        <activity
+            android:name=".ui.knowledge.KnowledgeMemberActivity"
+            android:label="@string/knowledge_member"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
     </application>
 
 </manifest>
