@@ -14,4 +14,8 @@
     <color name="status_running">#2196F3</color>
     <color name="status_pending">#FF9800</color>
     <color name="status_disable">#9E9E9E</color>
+
+    <color name="colorPrimary">#5CB5AB</color>
+    <color name="colorPrimaryDark">#4A9189</color>
+    <color name="colorAccent">#5CB5AB</color>
 </resources>
