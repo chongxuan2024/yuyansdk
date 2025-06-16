@@ -193,7 +193,7 @@ class ClipBoardContainer(context: Context, private val inputView: InputView) : L
 
     private fun showKnowledgeBaseDialog() {
         val user = UserManager.getCurrentUser() ?: return
-
+        println("request knowlegd list")
         val request = Request.Builder()
             .url("https://www.qingmiao.cloud/userapi/knowledge/list")
             .addHeader("Authorization", user.token)

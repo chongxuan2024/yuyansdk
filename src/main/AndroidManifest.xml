@@ -63,8 +63,8 @@
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
         <activity
             android:name=".ui.knowledge.KnowledgeManagementActivity"
-            android:label="@string/knowledge_management"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:exported="false" />
         <activity
             android:name=".ui.knowledge.KnowledgeDetailActivity"
             android:label="@string/knowledge_detail"

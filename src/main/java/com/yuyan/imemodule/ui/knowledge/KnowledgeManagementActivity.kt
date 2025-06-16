@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -39,10 +40,9 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupToolbar()
+        setupRecyclerView()
         setupViewPager()
         setupFab()
-        setupRecyclerView()
-        loadKnowledgeList()
     }
 
     private fun setupToolbar() {
@@ -50,8 +50,15 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    private fun setupRecyclerView() {
+        adapter = KnowledgeAdapter(
+            onDeleteClick = { fileId -> deleteKnowledge(fileId) },
+            onRefreshStatus = { fileId -> checkFileStatus(fileId) }
+        )
+    }
+
     private fun setupViewPager() {
-        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+        val pagerAdapter = object : FragmentStateAdapter(this) {
             override fun getItemCount() = 2
 
             override fun createFragment(position: Int) = when (position) {
@@ -59,6 +66,8 @@ class KnowledgeManagementActivity : AppCompatActivity() {
                 else -> KnowledgeListFragment.newInstance(isAdmin = false)
             }
         }
+        
+        binding.viewPager.adapter = pagerAdapter
 
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
@@ -66,20 +75,14 @@ class KnowledgeManagementActivity : AppCompatActivity() {
                 else -> "已授权知识库"
             }
         }.attach()
+
+        loadKnowledgeList()
     }
 
     private fun setupFab() {
         binding.fabAdd.setOnClickListener {
             showAddKnowledgeBaseDialog()
         }
-    }
-
-    private fun setupRecyclerView() {
-        adapter = KnowledgeAdapter(
-            onDeleteClick = { fileId -> deleteKnowledge(fileId) },
-            onRefreshStatus = { fileId -> checkFileStatus(fileId) }
-        )
-        binding.viewPager.adapter = adapter
     }
 
     private fun showAddKnowledgeBaseDialog() {
@@ -141,7 +144,7 @@ class KnowledgeManagementActivity : AppCompatActivity() {
             .addHeader("openid", user.username)
             .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
             .build()
-
+        println("createKnowledgeBase $jsonBody");
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
@@ -174,9 +177,26 @@ class KnowledgeManagementActivity : AppCompatActivity() {
     }
 
     private fun loadKnowledgeList() {
-        // 刷新当前页面
-        binding.viewPager.post {
-            binding.viewPager.adapter?.notifyDataSetChanged()
+        val currentItem = binding.viewPager.currentItem
+        Log.d("KnowledgeManagement", "当前页面索引: $currentItem")
+        
+        // 使用 ViewPager2 的方式获取当前的 Fragment
+        val fragment = supportFragmentManager.findFragmentByTag("f$currentItem")
+            ?: supportFragmentManager.fragments.firstOrNull { it is KnowledgeListFragment }
+        
+        if (fragment is KnowledgeListFragment) {
+            Log.d("KnowledgeManagement", "正在刷新知识库列表")
+            fragment.loadKnowledgeBases()
+        } else {
+            Log.e("KnowledgeManagement", "当前Fragment不是KnowledgeListFragment: ${fragment?.javaClass?.simpleName}")
+            // 如果找不到 Fragment，尝试延迟加载
+            binding.viewPager.post {
+                val delayedFragment = supportFragmentManager.findFragmentByTag("f$currentItem")
+                    ?: supportFragmentManager.fragments.firstOrNull { it is KnowledgeListFragment }
+                if (delayedFragment is KnowledgeListFragment) {
+                    delayedFragment.loadKnowledgeBases()
+                }
+            }
         }
     }
 
