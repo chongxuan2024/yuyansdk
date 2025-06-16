@@ -268,12 +268,11 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         val user = UserManager.getCurrentUser() ?: return
 
         val jsonBody = JSONObject().apply {
-            put("knowledgeId", knowledgeId)
             put("text", text)
         }
 
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/knowledge/uploadText")
+            .url("https://www.qingmiao.cloud/userapi/knowledge/uploadText/$knowledgeId")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
             .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
@@ -313,12 +312,11 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         val user = UserManager.getCurrentUser() ?: return
 
         val jsonBody = JSONObject().apply {
-            put("knowledgeId", knowledgeId)
             put("url", url)
         }
 
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/knowledge/uploadUrl")
+            .url("https://www.qingmiao.cloud/userapi/knowledge/uploadUrl/$knowledgeId")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
             .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
@@ -368,13 +366,12 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("knowledgeId", knowledgeId)
             .addFormDataPart("file", fileName,
                 tempFile.asRequestBody("application/octet-stream".toMediaType()))
             .build()
 
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/knowledge/uploadFile")
+            .url("https://www.qingmiao.cloud/userapi/knowledge/uploadFile/$knowledgeId")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
             .post(requestBody)
