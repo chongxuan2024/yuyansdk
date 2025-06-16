@@ -8,6 +8,7 @@ import android.provider.OpenableColumns
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -24,9 +25,12 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 class KnowledgeDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityKnowledgeDetailBinding
+    private lateinit var adapter: DocumentAdapter
     private val client = OkHttpClient()
     private lateinit var knowledgeId: String
     private var isAdmin: Boolean = false
@@ -35,6 +39,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         private const val EXTRA_KNOWLEDGE_ID = "knowledge_id"
         private const val EXTRA_IS_ADMIN = "is_admin"
         private const val REQUEST_PICK_FILE = 1
+        private const val EXTRA_KNOWLEDGE_BASE_ID = "extra_knowledge_base_id"
+        private const val MENU_UPLOAD = Menu.FIRST + 1
 
         fun createIntent(context: Context, knowledgeId: String, isAdmin: Boolean): Intent {
             return Intent(context, KnowledgeDetailActivity::class.java).apply {
@@ -54,7 +60,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
         setupToolbar()
         setupRecyclerView()
-        loadKnowledgeDetail()
+        loadDocuments()
     }
 
     private fun setupToolbar() {
@@ -64,7 +70,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (isAdmin) {
-            menuInflater.inflate(R.menu.menu_knowledge_detail, menu)
+            menu.add(Menu.NONE, MENU_UPLOAD, Menu.NONE, "上传文件")
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
         return true
     }
@@ -75,12 +82,12 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                 finish()
                 true
             }
-            R.id.action_add_member -> {
-                showAddMemberDialog()
+            MENU_UPLOAD -> {
+                showUploadDialog()
                 true
             }
-            R.id.action_upload -> {
-                showUploadDialog()
+            R.id.action_add_member -> {
+                showAddMemberDialog()
                 true
             }
             R.id.action_bill -> {
@@ -92,26 +99,33 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        // TODO: 实现文件列表适配器
-    }
-
-    private fun loadKnowledgeDetail() {
-        val user = UserManager.getCurrentUser() ?: return
-
-        val jsonBody = JSONObject().apply {
-            put("knowledgeId", knowledgeId)
+        adapter = DocumentAdapter()
+        binding.rvDocuments.apply {
+            layoutManager = LinearLayoutManager(this@KnowledgeDetailActivity)
+            adapter = this@KnowledgeDetailActivity.adapter
         }
 
+        // 设置下拉刷新
+        binding.swipeRefresh.setOnRefreshListener {
+            loadDocuments()
+        }
+    }
+
+    private fun loadDocuments() {
+        val user = UserManager.getCurrentUser() ?: return
+        val knowledgeBaseId = intent.getStringExtra(EXTRA_KNOWLEDGE_ID) ?: return
+
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/knowledge/detail")
+            .url("https://www.qingmiao.cloud/userapi/knowledge/detail/$knowledgeBaseId")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
-            .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
+            .get()
             .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
+                    binding.swipeRefresh.isRefreshing = false
                     Toast.makeText(this@KnowledgeDetailActivity,
                         "加载失败: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
@@ -120,17 +134,47 @@ class KnowledgeDetailActivity : AppCompatActivity() {
             override fun onResponse(call: Call, response: Response) {
                 val responseBody = response.body?.string()
                 runOnUiThread {
+                    binding.swipeRefresh.isRefreshing = false
                     if (response.isSuccessful && responseBody != null) {
-                        val jsonResponse = JSONObject(responseBody)
-                        if (jsonResponse.getBoolean("success")) {
-                            // TODO: 更新UI显示知识库详情
-                        } else {
+                        try {
+                            val jsonResponse = JSONObject(responseBody)
+                            if (jsonResponse.getBoolean("success")) {
+                                val documents = mutableListOf<Document>()
+                                val dataArray = jsonResponse.getJSONArray("data")
+                                
+                                for (i in 0 until dataArray.length()) {
+                                    val item = dataArray.getJSONObject(i)
+                                    documents.add(
+                                        Document(
+                                            id = item.getLong("id"),
+                                            uid = item.getLong("uid"),
+                                            createTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                                                .parse(item.getString("createTime")) ?: Date(),
+                                            fileId = item.getString("fileId"),
+                                            fileParseStatus = item.getString("fileParseStatus"),
+                                            jobId = item.getString("jobId"),
+                                            jobStatus = item.getString("jobStatus"),
+                                            status = item.getString("status"),
+                                            description = item.optString("description", "")
+                                        )
+                                    )
+                                }
+                                
+                                adapter.submitList(documents)
+                                
+                                // 如果列表为空，显示空状态
+                                binding.emptyView.visibility = if (documents.isEmpty()) View.VISIBLE else View.GONE
+                            } else {
+                                Toast.makeText(this@KnowledgeDetailActivity,
+                                    jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
                             Toast.makeText(this@KnowledgeDetailActivity,
-                                jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                                "数据解析失败: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(this@KnowledgeDetailActivity,
-                            "加载失败", Toast.LENGTH_SHORT).show()
+                            "加载失败: ${response.code}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -188,7 +232,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "添加成功", Toast.LENGTH_SHORT).show()
-                            loadKnowledgeDetail()
+                            loadDocuments()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
@@ -312,7 +356,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
-                            loadKnowledgeDetail()
+                            loadDocuments()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
@@ -357,7 +401,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
-                            loadKnowledgeDetail()
+                            loadDocuments()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
@@ -415,7 +459,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
-                            loadKnowledgeDetail()
+                            loadDocuments()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()

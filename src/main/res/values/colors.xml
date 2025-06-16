@@ -8,4 +8,10 @@
     <color name="x_recycler_color_loading_color1">#55777777</color>
     <color name="x_recycler_color_loading_color2">#B1777777</color>
     <color name="x_recycler_color_loading_color3">#FF777777</color>
+
+    <color name="status_ok">#4CAF50</color>
+    <color name="status_error">#F44336</color>
+    <color name="status_running">#2196F3</color>
+    <color name="status_pending">#FF9800</color>
+    <color name="status_disable">#9E9E9E</color>
 </resources>
