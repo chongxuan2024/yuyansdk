@@ -93,11 +93,14 @@ class ClipBoardAdapter(
     private fun loadKnowledgeBases() {
         val user = UserManager.getCurrentUser() ?: return
 
+        val jsonBody = JSONObject().apply {
+            put("isAdmin", "false")
+        }
         val request = Request.Builder()
             .url("https://www.qingmiao.cloud/userapi/knowledge/list")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
-            .post(FormBody.Builder().build())
+            .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -146,21 +149,6 @@ class ClipBoardAdapter(
         })
     }
 
-    private fun showKnowledgeBaseDialog(holder: SymbolHolder) {
-        val items = arrayOf("全选") + knowledgeBases.map { it.name }.toTypedArray()
-        val checkedItem = if (selectedKnowledgeBaseId == null) 0 else {
-            knowledgeBases.indexOfFirst { it.id == selectedKnowledgeBaseId } + 1
-        }
-
-        AlertDialog.Builder(mContext)
-            .setTitle("选择知识库")
-            .setSingleChoiceItems(items, checkedItem) { dialog, which ->
-                selectedKnowledgeBaseId = if (which == 0) null else knowledgeBases[which - 1].id
-                dialog.dismiss()
-                notifyDataSetChanged()
-            }
-            .show()
-    }
 
     // 创建ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SymbolHolder {
@@ -308,29 +296,24 @@ class ClipBoardAdapter(
             )
         }
 
-        // 添加知识库选择按钮
-        val selectKnowledgeButton = Button(mContext).apply {
-            text = "选择知识库"
-            setTextColor(textColor)
-            textSize = 12f
-            minHeight = 0
-            minimumHeight = dip2px(32)
-            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))
+        // 替换知识库选择按钮为Spinner
+        val selectKnowledgeSpinner = Spinner(mContext).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                dip2px(32)
+            ).apply {
+                marginEnd = dip2px(5)
+            }
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
                 setShape(GradientDrawable.RECTANGLE)
                 setCornerRadius(ThemeManager.prefs.keyRadius.getValue().toFloat())
-            }
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                marginEnd = dip2px(5)
+                setStroke(dip2px(1), textColor)
             }
         }
 
-        // 将按钮添加到按钮容器中
-        buttonContainer.addView(selectKnowledgeButton)
+        // 将Spinner添加到按钮容器中
+        buttonContainer.addView(selectKnowledgeSpinner)
         buttonContainer.addView(detailButton)
         buttonContainer.addView(restoreButton)
         buttonContainer.addView(newSessionButton)
@@ -363,26 +346,65 @@ class ClipBoardAdapter(
             buttonContainer.visibility = View.GONE
         }
 
-        return SymbolHolder(mContainer, detailButton, restoreButton, viewIvYopTips, newSessionButton, retryButton, selectKnowledgeButton)  // 传入置顶图标
+        return SymbolHolder(mContainer, detailButton, restoreButton, viewIvYopTips, newSessionButton, retryButton, selectKnowledgeSpinner)
     }
 
     // 绑定数据到ViewHolder
     override fun onBindViewHolder(holder: SymbolHolder, position: Int) {
         val data = mDatas[position]
-        val originalContent = data.content  // 保存原始内容
+        val originalContent = data.content
 
-        // 设置内容文本
         holder.textView.text = data.content.replace("\n", "\\n")
         holder.ivTopTips.visibility = if(data.isKeep == 1) View.VISIBLE else View.GONE
 
-        // 设置知识库选择按钮文本和点击事件
-        holder.selectKnowledgeButton.text = if (selectedKnowledgeBaseId == null) 
-            "知识库(全部)" 
-        else 
-            "知识库(${knowledgeBases.find { it.id == selectedKnowledgeBaseId }?.name ?: "未知"})"
-        
-        holder.selectKnowledgeButton.setOnClickListener {
-            showKnowledgeBaseDialog(holder)
+        // 设置Spinner的适配器和选中项
+        val items = listOf("知识库(全部)") + knowledgeBases.map { "知识库(${it.name})" }
+        val adapter = object : ArrayAdapter<String>(
+            mContext,
+            android.R.layout.simple_spinner_item,
+            items
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                (view as TextView).apply {
+                    setTextColor(textColor)
+                    textSize = 12f
+                    setPadding(dip2px(12), 0, dip2px(12), 0)
+                }
+                return view
+            }
+
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getDropDownView(position, convertView, parent)
+                (view as TextView).apply {
+                    setTextColor(textColor)
+                    textSize = 12f
+                    setPadding(dip2px(12), dip2px(8), dip2px(12), dip2px(8))
+                    background = GradientDrawable().apply {
+                        setColor(activeTheme.keyBackgroundColor)
+                    }
+                }
+                return view
+            }
+        }
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        holder.selectKnowledgeSpinner.adapter = adapter
+
+        // 设置当前选中项
+        val selectedPosition = if (selectedKnowledgeBaseId == null) 0 else {
+            knowledgeBases.indexOfFirst { it.id == selectedKnowledgeBaseId }.let { if (it == -1) 0 else it + 1 }
+        }
+        holder.selectKnowledgeSpinner.setSelection(selectedPosition)
+
+        // 设置选择监听器
+        holder.selectKnowledgeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedKnowledgeBaseId = if (position == 0) null else knowledgeBases[position - 1].id
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedKnowledgeBaseId = null
+            }
         }
 
         // AI 回复按钮点击事件
@@ -393,7 +415,6 @@ class ClipBoardAdapter(
         // 还原按钮点击事件
         holder.restoreButton.setOnClickListener {
             sendToInputBox(originalContent, holder)
-//            holder.restoreButton.visibility = View.GONE  // 还原后隐藏按钮
         }
     }
 
@@ -429,7 +450,7 @@ class ClipBoardAdapter(
         val jsonBody = JSONObject().apply {
             put("question", content)
             put("lastSessionId", currentSessionId)
-            knowledgeBaseId?.let { put("knowledgeBaseId", it) }
+            knowledgeBaseId?.let { put("knowledgeBaseIds", it) }
         }
 
         val user = UserManager.getCurrentUser()!!
@@ -542,9 +563,9 @@ class ClipBoardAdapter(
         button: Button,
         val restoreButton: Button,
         val ivTopTips: ImageView,
-        val newSessionButton: Button,  // 新增新会话按钮
-        val retryButton: Button,        // 新增重试按钮
-        val selectKnowledgeButton: Button
+        val newSessionButton: Button,
+        val retryButton: Button,
+        val selectKnowledgeSpinner: Spinner
     ) : RecyclerView.ViewHolder(view) {
         var textView: TextView
         var detailButton: Button
