@@ -59,7 +59,10 @@ class ClipBoardAdapter(
     private var mDatas : MutableList<Clipboard>
     // 上下文对象
     private val mContext: Context
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
     private val subMode: SkbMenuMode
     // 文本颜色
     private var textColor: Int
@@ -453,7 +456,6 @@ class ClipBoardAdapter(
         currentButton.isEnabled = false
         currentButton.text = "思考中..."
 
-        val client = OkHttpClient()
         val jsonBody = JSONObject().apply {
             put("question", content)
             put("lastSessionId", currentSessionId)
@@ -515,7 +517,6 @@ class ClipBoardAdapter(
     // 重试回答
     private fun retryAnswer(content: String, holder: SymbolHolder) {
 
-        val client = OkHttpClient()
         val jsonBody = JSONObject().apply {
             put("question", "答案不满意，请重新检索知识库，提供更加准确的答案")
             put("lastSessionId", currentSessionId)
@@ -523,7 +524,7 @@ class ClipBoardAdapter(
 
         val user = UserManager.getCurrentUser()!!
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/knowledge//chatNew")
+            .url("https://www.qingmiao.cloud/userapi/knowledge/chatNew")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
             .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
