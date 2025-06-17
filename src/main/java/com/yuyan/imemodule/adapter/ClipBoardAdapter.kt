@@ -409,7 +409,14 @@ class ClipBoardAdapter(
 
         // AI 回复按钮点击事件
         holder.detailButton.setOnClickListener {
-            showContentDialog(data.content, holder, originalContent, selectedKnowledgeBaseId)
+            // 如果selectedKnowledgeBaseId为空，使用所有知识库ID
+            val knowledgeBaseIds = if (selectedKnowledgeBaseId == null) {
+                knowledgeBases.map { it.id }.joinToString(",")
+            } else {
+                selectedKnowledgeBaseId
+            }
+            
+            showContentDialog(data.content, holder, originalContent, knowledgeBaseIds)
         }
 
         // 还原按钮点击事件
@@ -435,7 +442,7 @@ class ClipBoardAdapter(
     }
 
     // 修改显示内容的方法
-    private fun showContentDialog(content: String, holder: SymbolHolder, originalContent: String, knowledgeBaseId: String?) {
+    private fun showContentDialog(content: String, holder: SymbolHolder, originalContent: String, knowledgeBaseIds: String?) {
         val currentButton = holder.detailButton
 
         if (!UserManager.isLoggedIn()) {
@@ -450,12 +457,12 @@ class ClipBoardAdapter(
         val jsonBody = JSONObject().apply {
             put("question", content)
             put("lastSessionId", currentSessionId)
-            knowledgeBaseId?.let { put("knowledgeBaseIds", it) }
+            knowledgeBaseIds?.let { put("knowledgeBaseIds", it) }
         }
 
         val user = UserManager.getCurrentUser()!!
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/user/chatNew")
+            .url("https://www.qingmiao.cloud/userapi/knowledge/chatNew")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
             .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
@@ -516,7 +523,7 @@ class ClipBoardAdapter(
 
         val user = UserManager.getCurrentUser()!!
         val request = Request.Builder()
-            .url("https://www.qingmiao.cloud/userapi/user/chatNew")
+            .url("https://www.qingmiao.cloud/userapi/knowledge//chatNew")
             .addHeader("Authorization", user.token)
             .addHeader("openid", user.username)
             .post(RequestBody.create("application/json".toMediaType(), jsonBody.toString()))
