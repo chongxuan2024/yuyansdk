@@ -90,7 +90,7 @@ class ClipBoardAdapter(
         // 获取剪贴板布局模式设置
 //        clipboardLayoutCompact = AppPrefs.getInstance().clipboard.clipboardLayoutCompact.getValue()
         clipboardLayoutCompact = ClipboardLayoutMode.ListView
-        loadKnowledgeBases()
+//        loadKnowledgeBases()
     }
 
     private fun loadKnowledgeBases() {
@@ -316,7 +316,7 @@ class ClipBoardAdapter(
         }
 
         // 将Spinner添加到按钮容器中
-        buttonContainer.addView(selectKnowledgeSpinner)
+//        buttonContainer.addView(selectKnowledgeSpinner)
         buttonContainer.addView(detailButton)
         buttonContainer.addView(restoreButton)
         buttonContainer.addView(newSessionButton)
