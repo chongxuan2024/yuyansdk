@@ -45,7 +45,7 @@ import com.yuyan.imemodule.data.model.TemplateType
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-private const val AI_BUTTON_TEXT = "AI回复"
+private const val AI_BUTTON_TEXT = "AI咨询(重试)"
 
 /**
  * 剪切板界面适配器
@@ -279,25 +279,7 @@ class ClipBoardAdapter(
             }
         }
 
-        // 创建重试按钮
-        val retryButton = Button(mContext).apply {
-            text = "重试"
-            visibility = View.GONE
-            setTextColor(textColor)
-            textSize = 12f  // 设置更小的文字大小
-            minHeight = 0   // 移除最小高度限制
-            minimumHeight = dip2px(32)  // 设置合适的按钮高度
-            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
-            background = GradientDrawable().apply {
-                setColor(activeTheme.functionKeyBackgroundColor)
-                setShape(GradientDrawable.RECTANGLE)
-                setCornerRadius(ThemeManager.prefs.keyRadius.getValue().toFloat())
-            }
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
+
 
         // 替换知识库选择按钮为Spinner
         val selectKnowledgeSpinner = Spinner(mContext).apply {
@@ -320,7 +302,6 @@ class ClipBoardAdapter(
         buttonContainer.addView(detailButton)
         buttonContainer.addView(restoreButton)
         buttonContainer.addView(newSessionButton)
-        buttonContainer.addView(retryButton)
 
         // 将视图添加到主容器中
         mContainer.addView(viewContext)
@@ -349,7 +330,7 @@ class ClipBoardAdapter(
             buttonContainer.visibility = View.GONE
         }
 
-        return SymbolHolder(mContainer, detailButton, restoreButton, viewIvYopTips, newSessionButton, retryButton, selectKnowledgeSpinner)
+        return SymbolHolder(mContainer, detailButton, restoreButton, viewIvYopTips, newSessionButton,  selectKnowledgeSpinner)
     }
 
     // 绑定数据到ViewHolder
@@ -492,7 +473,6 @@ class ClipBoardAdapter(
                             sendToInputBox(jsonResponse.getString("text"), holder)
                             holder.restoreButton.visibility = View.VISIBLE
                             holder.newSessionButton.visibility = View.VISIBLE
-                            holder.retryButton.visibility = View.VISIBLE
                         } catch (e: Exception) {
                             Toast.makeText(mContext, "响应解析错误: ${response.code}",
                                 Toast.LENGTH_SHORT).show()
@@ -521,6 +501,8 @@ class ClipBoardAdapter(
             put("question", "答案不满意，请重新检索知识库，提供更加准确的答案")
             put("lastSessionId", currentSessionId)
         }
+
+
 
         val user = UserManager.getCurrentUser()!!
         val request = Request.Builder()
@@ -572,7 +554,6 @@ class ClipBoardAdapter(
         val restoreButton: Button,
         val ivTopTips: ImageView,
         val newSessionButton: Button,
-        val retryButton: Button,
         val selectKnowledgeSpinner: Spinner
     ) : RecyclerView.ViewHolder(view) {
         var textView: TextView
@@ -589,10 +570,6 @@ class ClipBoardAdapter(
                 clearSession(this)
             }
 
-            // 设置重试按钮点击事件
-            retryButton.setOnClickListener {
-                retryAnswer(textView.text.toString(), this)
-            }
         }
     }
 }
