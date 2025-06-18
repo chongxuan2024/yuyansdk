@@ -39,6 +39,7 @@ import android.view.ViewGroup.LayoutParams
 import android.widget.PopupWindow
 import android.os.Handler
 import android.os.Looper
+import androidx.core.view.marginLeft
 import com.yuyan.imemodule.data.model.KnowledgeBase
 import com.yuyan.imemodule.data.model.PaymentType
 import com.yuyan.imemodule.data.model.TemplateType
@@ -223,7 +224,7 @@ class ClipBoardAdapter(
             textSize = 12f  // 设置更小的文字大小
             minHeight = 0   // 移除最小高度限制
             minimumHeight = dip2px(32)  // 设置合适的按钮高度
-            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
+            setPadding(dip2px(14), dip2px(4), dip2px(14), dip2px(4))  // 设置内边距
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
                 setShape(GradientDrawable.RECTANGLE)
@@ -245,7 +246,7 @@ class ClipBoardAdapter(
             textSize = 12f  // 设置更小的文字大小
             minHeight = 0   // 移除最小高度限制
             minimumHeight = dip2px(32)  // 设置合适的按钮高度
-            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
+            setPadding(dip2px(14), dip2px(4), dip2px(14), dip2px(4))  // 设置内边距
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
                 setShape(GradientDrawable.RECTANGLE)
@@ -254,7 +255,9 @@ class ClipBoardAdapter(
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+            ).apply {
+                marginEnd = dip2px(5)
+            }
         }
 
         // 创建新会话按钮
@@ -265,7 +268,7 @@ class ClipBoardAdapter(
             textSize = 12f  // 设置更小的文字大小
             minHeight = 0   // 移除最小高度限制
             minimumHeight = dip2px(32)  // 设置合适的按钮高度
-            setPadding(dip2px(12), dip2px(4), dip2px(12), dip2px(4))  // 设置内边距
+            setPadding(dip2px(14), dip2px(4), dip2px(14), dip2px(4))  // 设置内边距
             background = GradientDrawable().apply {
                 setColor(activeTheme.functionKeyBackgroundColor)
                 setShape(GradientDrawable.RECTANGLE)
@@ -298,7 +301,6 @@ class ClipBoardAdapter(
         }
 
         // 将Spinner添加到按钮容器中
-//        buttonContainer.addView(selectKnowledgeSpinner)
         buttonContainer.addView(detailButton)
         buttonContainer.addView(restoreButton)
         buttonContainer.addView(newSessionButton)
@@ -353,7 +355,7 @@ class ClipBoardAdapter(
                 (view as TextView).apply {
                     setTextColor(textColor)
                     textSize = 12f
-                    setPadding(dip2px(12), 0, dip2px(12), 0)
+                    setPadding(dip2px(14), 0, dip2px(14), 0)
                 }
                 return view
             }
@@ -363,7 +365,7 @@ class ClipBoardAdapter(
                 (view as TextView).apply {
                     setTextColor(textColor)
                     textSize = 12f
-                    setPadding(dip2px(12), dip2px(8), dip2px(12), dip2px(8))
+                    setPadding(dip2px(14), dip2px(8), dip2px(14), dip2px(8))
                     background = GradientDrawable().apply {
                         setColor(activeTheme.keyBackgroundColor)
                     }
