@@ -46,7 +46,8 @@ import com.yuyan.imemodule.data.model.TemplateType
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-private const val AI_BUTTON_TEXT = "AI咨询(重试)"
+private const val AI_BUTTON_TEXT = "AI咨询"
+private const val AI_BUTTON_TEXT_RETRY = "重新生成"
 
 /**
  * 剪切板界面适配器
@@ -407,6 +408,7 @@ class ClipBoardAdapter(
 
         // 还原按钮点击事件
         holder.restoreButton.setOnClickListener {
+            holder.detailButton.text = AI_BUTTON_TEXT
             sendToInputBox(originalContent, holder)
         }
     }
@@ -438,9 +440,13 @@ class ClipBoardAdapter(
 
         currentButton.isEnabled = false
         currentButton.text = "思考中..."
+        var targetContent = content
+        if (content != originalContent) {
+            targetContent = "回答不满意，请重新生成"
+        }
 
         val jsonBody = JSONObject().apply {
-            put("question", content)
+            put("question", targetContent)
             put("lastSessionId", currentSessionId)
             knowledgeBaseIds?.let { put("knowledgeBaseIds", it) }
         }
@@ -466,7 +472,7 @@ class ClipBoardAdapter(
                 val responseBody = response.body?.string()
                 mainHandler.post {
                     currentButton.isEnabled = true
-                    currentButton.text = AI_BUTTON_TEXT
+                    currentButton.text = AI_BUTTON_TEXT_RETRY
                     if (response.isSuccessful && responseBody != null) {
                         val jsonResponse = JSONObject(responseBody)
                             println(jsonResponse)
