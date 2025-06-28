@@ -263,7 +263,7 @@ class ClipBoardAdapter(
 
         // 创建新会话按钮
         val newSessionButton = Button(mContext).apply {
-            text = "新会话"
+            text = "新对话"
             visibility = View.VISIBLE
             setTextColor(textColor)
             textSize = 12f  // 设置更小的文字大小
