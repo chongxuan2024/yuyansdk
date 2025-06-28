@@ -31,7 +31,10 @@ import java.util.*
 class KnowledgeDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityKnowledgeDetailBinding
     private lateinit var adapter: DocumentAdapter
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
     private lateinit var knowledgeId: String
     private var isAdmin: Boolean = false
 

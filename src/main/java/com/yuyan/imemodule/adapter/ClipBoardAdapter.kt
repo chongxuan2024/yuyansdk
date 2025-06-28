@@ -62,8 +62,8 @@ class ClipBoardAdapter(
     // 上下文对象
     private val mContext: Context
     private val client = OkHttpClient.Builder()
-        .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .connectTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
         .build()
     private val subMode: SkbMenuMode
     // 文本颜色

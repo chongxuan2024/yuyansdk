@@ -25,7 +25,10 @@ import java.time.ZoneId
 class KnowledgeListFragment : Fragment() {
     private var _binding: FragmentKnowledgeListBinding? = null
     private val binding get() = _binding!!
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
     private lateinit var adapter: KnowledgeBaseAdapter
     private var isAdmin: Boolean = false
     private val TAG = "KnowledgeListFragment"

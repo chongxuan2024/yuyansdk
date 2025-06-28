@@ -22,7 +22,10 @@ import java.io.IOException
 class KnowledgeMemberActivity : AppCompatActivity() {
     private lateinit var binding: ActivityKnowledgeMemberBinding
     private lateinit var adapter: MemberAdapter
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
     private lateinit var knowledgeId: String
     private var isAdmin: Boolean = false
 

@@ -31,7 +31,10 @@ import java.io.IOException
 class KnowledgeManagementActivity : AppCompatActivity() {
     private lateinit var binding: ActivityKnowledgeManagementBinding
     private lateinit var adapter: KnowledgeAdapter
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
     private val PICK_FILE_REQUEST = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
