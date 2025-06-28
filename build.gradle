@@ -71,7 +71,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg'
-            resValue("string", "app_name", "@string/ime_yuyan_name")
+            resValue("string", "app_name", "@string/ime_yuyan_name_debug")
         }
         debug {
             resValue("string", "app_name", "@string/ime_yuyan_name_debug")
