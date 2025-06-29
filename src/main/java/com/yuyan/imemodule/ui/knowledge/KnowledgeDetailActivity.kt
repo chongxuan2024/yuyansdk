@@ -201,13 +201,13 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun showUploadDialog() {
         val items = arrayOf(
-            "添加知识文本 🌱",
-            "上传知识文件 🌿",
-            "分享知识图片 🍃",
-            "导入网页内容 🌸"
+            "添加知识装饰 🎁",
+            "上传知识彩球 🎄",
+            "分享知识星星 ⭐",
+            "导入知识礼物 🎀"
         )
         AlertDialog.Builder(this)
-            .setTitle("为知识树添加养分")
+            .setTitle("为圣诞树添加装饰")
             .setItems(items) { _, which ->
                 when (which) {
                     0 -> showTextInputDialog()
@@ -443,8 +443,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun showDeleteConfirmDialog(document: Document) {
         AlertDialog.Builder(this)
-            .setTitle("修剪知识树")
-            .setMessage("确定要移除这个知识文档吗？这可能会影响知识树的生长。")
+            .setTitle("修剪圣诞树")
+            .setMessage("确定要移除这个知识装饰吗？这可能会影响圣诞树的生长。")
             .setPositiveButton("确定") { _, _ ->
                 deleteDocument(document)
             }
@@ -505,19 +505,19 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun updateTreeLevel(documentCount: Int) {
         val (level, description, drawable) = when {
-            documentCount >= 10 -> Triple(
-                "知识树 Level 3",
-                "你的知识树已经长成参天大树，枝繁叶茂！",
+            documentCount >= 17 -> Triple(
+                "圣诞树 Level 3",
+                "你的知识树已经长成一棵巨大的圣诞树，散发着智慧的光芒！🌟",
                 R.drawable.knowledge_tree_level3
             )
-            documentCount >= 5 -> Triple(
-                "知识树 Level 2",
-                "你的知识树正在茁壮成长，继续加油！",
+            documentCount >= 8 -> Triple(
+                "圣诞树 Level 2",
+                "你的知识树正在茁壮成长，装饰也越来越丰富了！🎄",
                 R.drawable.knowledge_tree_level2
             )
             else -> Triple(
-                "知识树 Level 1",
-                "开始培育你的知识树吧！",
+                "圣诞树 Level 1",
+                "开始装饰你的知识圣诞树吧！🎁",
                 R.drawable.knowledge_tree_level1
             )
         }
@@ -536,7 +536,12 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     private fun uploadSuccess() {
         documentCount++
         updateTreeLevel(documentCount)
-        Toast.makeText(this, "知识树获得了新的养分！", Toast.LENGTH_SHORT).show()
+        val message = when {
+            documentCount >= 17 -> "知识树已经长成参天大树！🌟"
+            documentCount >= 8 -> "知识树又长高了一层！🎄"
+            else -> "知识树获得了新的装饰！🎁"
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         loadDocuments()
     }
 } 
