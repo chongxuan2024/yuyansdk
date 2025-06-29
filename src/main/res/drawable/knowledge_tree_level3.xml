@@ -22,7 +22,7 @@
 
     <!-- 雪花 - 上部中央偏左 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.5"
         android:pathData="M60,30 L64,34 M60,32 L64,32 M62,30 L62,34"/>
 
@@ -44,7 +44,7 @@
 
     <!-- 雪花 - 上部中央偏右 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.7"
         android:pathData="M140,45 L145,50 M140,47.5 L145,47.5 M142.5,45 L142.5,50"/>
 
@@ -64,13 +64,13 @@
 
     <!-- 雪花 - 中部偏左 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.6"
         android:pathData="M45,110 L49,114 M45,112 L49,112 M47,110 L47,114"/>
 
     <!-- 雪花 - 左侧上部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.8"
         android:pathData="M30,65 L36,71 M30,68 L36,68 M33,65 L33,71"/>
 

@@ -18,7 +18,7 @@
         android:pathData="M90,33 Q88,33 88,35 Q88,37 90,37 Q92,37 92,35 Q92,33 90,33 Z"/>
     <!-- 雪花- 左上角 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.5"
         android:pathData="M15,25 L19,29 M15,27 L19,27 M17,25 L17,29"/>
 
@@ -40,7 +40,7 @@
 
     <!-- 雪花- 右上角 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.8"
         android:pathData="M170,35 L176,41 M170,38 L176,38 M173,35 L173,41"/>
 
@@ -60,7 +60,7 @@
         android:pathData="M95,54 Q93,54 93,56 Q93,58 95,58 Q97,58 97,56 Q97,54 95,54 Z"/>
     <!-- 雪花- 左侧下部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.7"
         android:pathData="M35,130 L40,135 M35,132.5 L40,132.5 M37.5,130 L37.5,135"/>
 
@@ -83,7 +83,7 @@
 
     <!-- 雪花 - 下部中央 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.4"
         android:pathData="M100,180 L103,183 M100,181.5 L103,181.5 M101.5,180 L101.5,183"/>
 
@@ -102,7 +102,7 @@
         android:pathData="M105,75 Q103,75 103,77 Q103,79 105,79 Q107,79 107,77 Q107,75 105,75 Z"/>
     <!-- 雪花 - 右侧上部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.4"
         android:pathData="M160,60 L163,63 M160,61.5 L163,61.5 M161.5,60 L161.5,63"/>
 
@@ -123,7 +123,7 @@
 
     <!-- 雪花 - 右侧下部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.5"
         android:pathData="M165,120 L169,124 M165,122 L169,122 M167,120 L167,124"/>
 
@@ -143,7 +143,7 @@
 
     <!-- 雪花  - 右侧中部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.5"
         android:pathData="M175,100 L179,104 M175,102 L179,102 M177,100 L177,104"/>
 
@@ -162,7 +162,7 @@
 
     <!-- 雪花  - 左侧中部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.6"
         android:pathData="M25,80 L29,84 M25,82 L29,82 M27,80 L27,84"/>
 
@@ -184,7 +184,7 @@
         android:pathData="M60,118 Q58,118 58,120 Q58,122 60,122 Q62,122 62,120 Q62,118 60,118 Z"/>
     <!-- 雪花  - 右下部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.8"
         android:pathData="M185,140 L191,146 M185,143 L191,143 M188,140 L188,146"/>
 
@@ -204,7 +204,7 @@
         android:pathData="M145,128 Q143,128 143,130 Q143,132 145,132 Q147,132 147,130 Q147,128 145,128 Z"/>
     <!-- 雪花 - 左上中部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.6"
         android:pathData="M40,50 L44,54 M40,52 L44,52 M42,50 L42,54"/>
 
@@ -224,7 +224,7 @@
 
     <!-- 雪花 - 左下角 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.4"
         android:pathData="M20,160 L23,163 M20,161.5 L23,161.5 M21.5,160 L21.5,163"/>
 
@@ -246,7 +246,7 @@
 
     <!-- 雪花 - 上部中央偏左 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.5"
         android:pathData="M60,30 L64,34 M60,32 L64,32 M62,30 L62,34"/>
 
@@ -268,7 +268,7 @@
 
     <!-- 雪花 - 上部中央偏右 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.7"
         android:pathData="M140,45 L145,50 M140,47.5 L145,47.5 M142.5,45 L142.5,50"/>
 
@@ -288,13 +288,13 @@
 
     <!-- 雪花 - 中部偏左 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.6"
         android:pathData="M45,110 L49,114 M45,112 L49,112 M47,110 L47,114"/>
 
     <!-- 雪花 - 左侧上部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.8"
         android:pathData="M30,65 L36,71 M30,68 L36,68 M33,65 L33,71"/>
 

@@ -22,13 +22,13 @@
 
     <!-- 雪花 - 中部偏左 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.6"
         android:pathData="M45,110 L49,114 M45,112 L49,112 M47,110 L47,114"/>
 
     <!-- 雪花 - 左侧上部 -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#87CEEB"
         android:strokeWidth="0.8"
         android:pathData="M30,65 L36,71 M30,68 L36,68 M33,65 L33,71"/>
 
