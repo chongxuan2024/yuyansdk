@@ -1,6 +1,7 @@
 package com.yuyan.imemodule.ui.knowledge
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -35,26 +36,41 @@ data class Document(
     }
 }
 
-class DocumentAdapter : ListAdapter<Document, DocumentAdapter.ViewHolder>(DocumentDiffCallback()) {
+class DocumentAdapter(private val isAdmin: Boolean = false) : ListAdapter<Document, DocumentAdapter.ViewHolder>(DocumentDiffCallback()) {
+
+    private var onDeleteClickListener: ((Document) -> Unit)? = null
+
+    fun setOnDeleteClickListener(listener: (Document) -> Unit) {
+        onDeleteClickListener = listener
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemDocumentBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return ViewHolder(binding)
+        return ViewHolder(binding, onDeleteClickListener)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), isAdmin)
     }
 
-    class ViewHolder(private val binding: ItemDocumentBinding) : RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(
+        private val binding: ItemDocumentBinding,
+        private val onDeleteClickListener: ((Document) -> Unit)?
+    ) : RecyclerView.ViewHolder(binding.root) {
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
-        fun bind(document: Document) {
+        fun bind(document: Document, isAdmin: Boolean) {
             binding.apply {
-                tvFileId.text = document.fileId
+//                tvFileId.text = document.fileId
                 tvDescription.text = document.description
+                
+                // 设置删除按钮的可见性和点击事件
+                btnDelete.visibility = if (isAdmin) View.VISIBLE else View.GONE
+                btnDelete.setOnClickListener {
+                    onDeleteClickListener?.invoke(document)
+                }
                 
                 // 设置文档状态
                 chipStatus.apply {
@@ -88,28 +104,28 @@ class DocumentAdapter : ListAdapter<Document, DocumentAdapter.ViewHolder>(Docume
                 }
 
                 // 设置任务状态
-                tvJobStatus.apply {
-                    text = "任务状态：${
-                        when (document.jobStatus) {
-                            Document.JOB_STATUS_COMPLETED -> "已完成"
-                            Document.JOB_STATUS_FAILED -> "失败"
-                            Document.JOB_STATUS_RUNNING -> "运行中"
-                            Document.JOB_STATUS_PENDING -> "等待中"
-                            else -> document.jobStatus
-                        }
-                    }"
-                    setTextColor(
-                        context.getColor(
-                            when (document.jobStatus) {
-                                Document.JOB_STATUS_COMPLETED -> R.color.status_ok
-                                Document.JOB_STATUS_FAILED -> R.color.status_error
-                                Document.JOB_STATUS_RUNNING -> R.color.status_running
-                                Document.JOB_STATUS_PENDING -> R.color.status_pending
-                                else -> R.color.status_error
-                            }
-                        )
-                    )
-                }
+//                tvJobStatus.apply {
+//                    text = "任务状态：${
+//                        when (document.jobStatus) {
+//                            Document.JOB_STATUS_COMPLETED -> "已完成"
+//                            Document.JOB_STATUS_FAILED -> "失败"
+//                            Document.JOB_STATUS_RUNNING -> "运行中"
+//                            Document.JOB_STATUS_PENDING -> "等待中"
+//                            else -> document.jobStatus
+//                        }
+//                    }"
+//                    setTextColor(
+//                        context.getColor(
+//                            when (document.jobStatus) {
+//                                Document.JOB_STATUS_COMPLETED -> R.color.status_ok
+//                                Document.JOB_STATUS_FAILED -> R.color.status_error
+//                                Document.JOB_STATUS_RUNNING -> R.color.status_running
+//                                Document.JOB_STATUS_PENDING -> R.color.status_pending
+//                                else -> R.color.status_error
+//                            }
+//                        )
+//                    )
+//                }
 
                 // 设置创建时间
                 tvCreateTime.text = "创建时间：${dateFormat.format(document.createTime)}"

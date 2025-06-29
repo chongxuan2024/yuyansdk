@@ -101,10 +101,15 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = DocumentAdapter()
+        adapter = DocumentAdapter(isAdmin)
         binding.rvDocuments.apply {
             layoutManager = LinearLayoutManager(this@KnowledgeDetailActivity)
             adapter = this@KnowledgeDetailActivity.adapter
+        }
+
+        // 设置删除点击事件
+        adapter.setOnDeleteClickListener { document ->
+            showDeleteConfirmDialog(document)
         }
 
         // 设置下拉刷新
@@ -423,5 +428,60 @@ class KnowledgeDetailActivity : AppCompatActivity() {
             }
         }
         return fileName
+    }
+
+    private fun showDeleteConfirmDialog(document: Document) {
+        AlertDialog.Builder(this)
+            .setTitle("删除确认")
+            .setMessage("确定要删除这个文档吗？")
+            .setPositiveButton("确定") { _, _ ->
+                deleteDocument(document)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun deleteDocument(document: Document) {
+        val user = UserManager.getCurrentUser() ?: return
+
+        val jsonBody = JSONObject().apply {
+            put("id", document.id)
+        }
+
+        val request = Request.Builder()
+            .url("https://www.qingmiao.cloud/userapi/knowledge/document/delete")
+            .addHeader("Authorization", user.token)
+            .addHeader("openid", user.username)
+            .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@KnowledgeDetailActivity,
+                        "删除失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                runOnUiThread {
+                    try {
+                        val jsonResponse = JSONObject(responseBody)
+                        if (jsonResponse.getBoolean("success")) {
+                            Toast.makeText(this@KnowledgeDetailActivity,
+                                "删除成功", Toast.LENGTH_SHORT).show()
+                            loadDocuments() // 重新加载文档列表
+                        } else {
+                            Toast.makeText(this@KnowledgeDetailActivity,
+                                jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(this@KnowledgeDetailActivity,
+                            "删除失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
     }
 } 
