@@ -87,6 +87,7 @@ abstract class DataBaseKT : RoomDatabase() {
                 val skbFuns = listOf(
                     SkbFun(name = SkbMenuMode.ClipBoard.name, isKeep = 1),
                     SkbFun(name = SkbMenuMode.Emojicon.name, isKeep = 1),
+                    SkbFun(name = SkbMenuMode.Knowledge.name, isKeep = 1),
 
                     SkbFun(name = SkbMenuMode.Emojicon.name, isKeep = 0, position = 0),
                     SkbFun(name = SkbMenuMode.SwitchKeyboard.name, isKeep = 0, position = 1),
