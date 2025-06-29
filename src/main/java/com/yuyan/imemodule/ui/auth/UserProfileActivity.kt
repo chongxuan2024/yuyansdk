@@ -15,6 +15,18 @@ class UserProfileActivity : AppCompatActivity() {
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 设置Toolbar
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            title = getString(R.string.user_profile)
+        }
+
+        // 设置Toolbar的返回按钮点击事件
+        binding.toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
         // 显示用户信息
         UserManager.getCurrentUser()?.let { user ->
             binding.tvUsername.text = getString(R.string.username_format, user.username)

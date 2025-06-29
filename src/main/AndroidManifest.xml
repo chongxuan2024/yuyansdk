@@ -60,7 +60,7 @@
         <activity
             android:name=".ui.auth.UserProfileActivity"
             android:label="@string/user_profile"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
         <activity
             android:name=".ui.knowledge.KnowledgeManagementActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
