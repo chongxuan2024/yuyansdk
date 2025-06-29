@@ -504,23 +504,20 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     }
 
     private fun updateTreeLevel(documentCount: Int) {
-        val (level, description, drawable) = when {
-            documentCount >= 17 -> Triple(
-                "圣诞树 Level 3",
-                "你的知识树已经长成一棵巨大的圣诞树，散发着智慧的光芒！🌟",
-                R.drawable.knowledge_tree_level3
-            )
-            documentCount >= 8 -> Triple(
-                "圣诞树 Level 2",
-                "你的知识树正在茁壮成长，装饰也越来越丰富了！🎄",
-                R.drawable.knowledge_tree_level2
-            )
-            else -> Triple(
-                "圣诞树 Level 1",
-                "开始装饰你的知识圣诞树吧！🎁",
-                R.drawable.knowledge_tree_level1
-            )
+        val actualCount = minOf(documentCount, 9)  // 限制最大层级为20
+        val level = "知识树 Level $actualCount"
+        val description = when (actualCount) {
+            9 -> "恭喜！你的知识树已经长到最高啦！🌟"
+            in 7..8 -> "你的知识树已经非常高大了，继续加油！🎄"
+            in 4..6 -> "知识树茁壮成长中，装饰也越来越漂亮了！🎁"
+            in 1..3 -> "知识树正在慢慢长高，继续添加知识吧！🎀"
+            else -> "开始养育你的小知识树吧！⭐"
         }
+        val drawable = resources.getIdentifier(
+            "knowledge_tree_level$actualCount",
+            "drawable",
+            packageName
+        )
 
         binding.apply {
             tvTreeLevel.text = level
@@ -535,11 +532,12 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun uploadSuccess() {
         documentCount++
+        val actualCount = minOf(documentCount, 9)
         updateTreeLevel(documentCount)
         val message = when {
-            documentCount >= 17 -> "知识树已经长成参天大树！🌟"
-            documentCount >= 8 -> "知识树又长高了一层！🎄"
-            else -> "知识树获得了新的装饰！🎁"
+            actualCount >= 9 -> "知识树已经长到最高啦！🌟"
+            actualCount >= 5 -> "知识树又长高了，真是棒极了！🎄"
+            else -> "知识树长高了一层！⭐"
         }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         loadDocuments()

@@ -8,45 +8,30 @@
     <!-- 树干 -->
     <path
         android:fillColor="#8B4513"
-        android:pathData="M45,80 L55,80 L55,95 L45,95 Z"/>
+        android:pathData="M45,85 L55,85 L55,95 L45,95 Z"/>
     
-    <!-- 第一层（底层）树叶 -->
+    <!-- 第一层树叶 -->
     <path
         android:fillColor="#2E8B57"
-        android:pathData="M20,80 L80,80 L50,60 Z"/>
-        
-    <!-- 第二层树叶 -->
-    <path
-        android:fillColor="#228B22"
-        android:pathData="M25,65 L75,65 L50,45 Z"/>
-        
-    <!-- 第三层（顶层）树叶 -->
-    <path
-        android:fillColor="#006400"
-        android:pathData="M30,50 L70,50 L50,30 Z"/>
-        
-    <!-- 装饰球1 -->
+        android:pathData="M32,85 L68,85 L50,80 Z"/>
+
+    <!-- 装饰球1-3 -->
     <path
         android:fillColor="#FF0000"
-        android:pathData="M35,75 C33,75 33,77 35,77 C37,77 37,75 35,75"/>
-        
-    <!-- 装饰球2 -->
+        android:pathData="M42,83 C41,83 41,84 42,84 C43,84 43,83 42,83"/>
     <path
         android:fillColor="#FFD700"
-        android:pathData="M65,75 C63,75 63,77 65,77 C67,77 67,75 65,75"/>
-        
-    <!-- 装饰球3 -->
+        android:pathData="M58,83 C57,83 57,84 58,84 C59,84 59,83 58,83"/>
     <path
         android:fillColor="#4169E1"
-        android:pathData="M45,60 C43,60 43,62 45,62 C47,62 47,60 45,60"/>
+        android:pathData="M50,80 C49,80 49,81 50,81 C51,81 51,80 50,80"/>
         
-    <!-- 装饰球4 -->
+    <!-- 小彩灯1-2 -->
     <path
-        android:fillColor="#FF69B4"
-        android:pathData="M55,45 C53,45 53,47 55,47 C57,47 57,45 55,45"/>
+        android:fillColor="#FFFF00"
+        android:pathData="M45,81 L46,81"/>
+    <path
+        android:fillColor="#00FF00"
+        android:pathData="M55,78 L56,78"/>
         
-    <!-- 树顶星星 -->
-    <path
-        android:fillColor="#FFD700"
-        android:pathData="M50,25 L52,20 L54,25 L59,25 L55,28 L57,33 L50,30 L43,33 L45,28 L41,25 Z"/>
 </vector>

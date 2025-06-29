@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    
+    <!-- 树干 -->
+    <path
+        android:fillColor="#8B4513"
+        android:pathData="M45,85 L55,85 L55,95 L45,95 Z"/>
+    
+    <!-- 第一层树叶 -->
+    <path
+        android:fillColor="#2E8B57"
+        android:pathData="M30,85 L70,85 L50,78 Z"/>
+        
+    <!-- 第二层树叶 -->
+    <path
+        android:fillColor="#228B22"
+        android:pathData="M33,81 L67,81 L50,74 Z"/>
+        
+    <!-- 第三层树叶 -->
+    <path
+        android:fillColor="#006400"
+        android:pathData="M36,77 L64,77 L50,70 Z"/>
+        
+    <!-- 第四层树叶 -->
+    <path
+        android:fillColor="#2E8B57"
+        android:pathData="M39,73 L61,73 L50,66.5 Z"/>
+        
+    <!-- 装饰球1-4 -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M40,83 C39,83 39,84 40,84 C41,84 41,83 40,83"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M60,83 C59,83 59,84 60,84 C61,84 61,83 60,83"/>
+    <path
+        android:fillColor="#4169E1"
+        android:pathData="M45,79 C44,79 44,80 45,80 C46,80 46,79 45,79"/>
+    <path
+        android:fillColor="#FF69B4"
+        android:pathData="M55,75 C54,75 54,76 55,76 C56,76 56,75 55,75"/>
+        
+    <!-- 小彩灯1-3 -->
+    <path
+        android:fillColor="#FFFF00"
+        android:pathData="M43,80 L44,80"/>
+    <path
+        android:fillColor="#00FF00"
+        android:pathData="M57,76 L58,76"/>
+    <path
+        android:fillColor="#FF00FF"
+        android:pathData="M50,72 L51,72"/>
+        
+    <!-- 礼物盒1 -->
+    <path
+        android:fillColor="#FF1493"
+        android:pathData="M30,85 L38,85 L38,95 L30,95 Z"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M33,85 L35,85 L35,95 L33,95 Z"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M30,89 L38,89 L38,91 L30,91 Z"/>
+
+</vector> 
