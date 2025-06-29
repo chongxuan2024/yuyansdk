@@ -505,7 +505,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     }
 
     private fun updateTreeLevel(documentCount: Int) {
-        val actualCount = minOf(documentCount, 9)  // 限制最大层级为20
+        val actualCount = minOf(documentCount, 15)  // 限制最大层级为20
         val level = "知识树 Level $actualCount"
         val description = when (actualCount) {
             15 -> "恭喜！你的知识树已经长到最高啦！🌟"
