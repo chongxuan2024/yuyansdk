@@ -51,12 +51,12 @@
         <activity
             android:name=".ui.auth.LoginActivity"
             android:label="@string/login"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
 
         <activity
             android:name=".ui.auth.RegisterActivity"
             android:label="@string/register"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
         <activity
             android:name=".ui.auth.UserProfileActivity"
             android:label="@string/user_profile"

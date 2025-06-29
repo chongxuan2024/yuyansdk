@@ -24,6 +24,18 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 设置Toolbar
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            title = "注册"
+        }
+
+        // 设置Toolbar的返回按钮点击事件
+        binding.toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
         binding.btnRegister.setOnClickListener {
             val username = binding.etUsername.text.toString()
             val email = binding.etEmail.text.toString()
