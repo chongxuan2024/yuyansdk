@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    
+    <!-- 树干 -->
+    <path
+        android:fillColor="#8B4513"
+        android:pathData="M45,80 L55,80 L55,95 L45,95 Z"/>
+    
+    <!-- 树叶 -->
+    <path
+        android:fillColor="#90EE90"
+        android:pathData="M50,30 C20,30 20,60 50,60 C80,60 80,30 50,30"/>
+</vector>

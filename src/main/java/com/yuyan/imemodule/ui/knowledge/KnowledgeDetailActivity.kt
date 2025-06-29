@@ -27,6 +27,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import android.view.animation.AnimationUtils
+import android.view.animation.Animation
 
 class KnowledgeDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityKnowledgeDetailBinding
@@ -37,6 +39,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         .build()
     private lateinit var knowledgeId: String
     private var isAdmin: Boolean = false
+    private var documentCount = 0
 
     companion object {
         private const val EXTRA_KNOWLEDGE_ID = "knowledge_id"
@@ -65,6 +68,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         setupRecyclerView()
         setupFab()
         loadDocuments()
+        setupTreeAnimation()
     }
 
     private fun setupToolbar() {
@@ -171,6 +175,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                                 
                                 // 如果列表为空，显示空状态
                                 binding.emptyView.visibility = if (documents.isEmpty()) View.VISIBLE else View.GONE
+                                documentCount = documents.size
+                                updateTreeLevel(documentCount)
                             } else {
                                 Toast.makeText(this@KnowledgeDetailActivity,
                                     jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
@@ -194,9 +200,14 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     }
 
     private fun showUploadDialog() {
-        val items = arrayOf("文本", "文件", "图片", "HTML地址")
+        val items = arrayOf(
+            "添加知识文本 🌱",
+            "上传知识文件 🌿",
+            "分享知识图片 🍃",
+            "导入网页内容 🌸"
+        )
         AlertDialog.Builder(this)
-            .setTitle("选择上传类型")
+            .setTitle("为知识树添加养分")
             .setItems(items) { _, which ->
                 when (which) {
                     0 -> showTextInputDialog()
@@ -302,7 +313,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
-                            loadDocuments()
+                            uploadSuccess()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
@@ -346,7 +357,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
-                            loadDocuments()
+                            uploadSuccess()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
@@ -403,7 +414,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
-                            loadDocuments()
+                            uploadSuccess()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
@@ -432,8 +443,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun showDeleteConfirmDialog(document: Document) {
         AlertDialog.Builder(this)
-            .setTitle("删除确认")
-            .setMessage("确定要删除这个文档吗？")
+            .setTitle("修剪知识树")
+            .setMessage("确定要移除这个知识文档吗？这可能会影响知识树的生长。")
             .setPositiveButton("确定") { _, _ ->
                 deleteDocument(document)
             }
@@ -471,6 +482,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "删除成功", Toast.LENGTH_SHORT).show()
+                            documentCount--
+                            updateTreeLevel(documentCount)
                             loadDocuments() // 重新加载文档列表
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
@@ -483,5 +496,47 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun setupTreeAnimation() {
+        val growAnimation = AnimationUtils.loadAnimation(this, R.anim.tree_grow)
+        binding.ivTree.startAnimation(growAnimation)
+    }
+
+    private fun updateTreeLevel(documentCount: Int) {
+        val (level, description, drawable) = when {
+            documentCount >= 10 -> Triple(
+                "知识树 Level 3",
+                "你的知识树已经长成参天大树，枝繁叶茂！",
+                R.drawable.knowledge_tree_level3
+            )
+            documentCount >= 5 -> Triple(
+                "知识树 Level 2",
+                "你的知识树正在茁壮成长，继续加油！",
+                R.drawable.knowledge_tree_level2
+            )
+            else -> Triple(
+                "知识树 Level 1",
+                "开始培育你的知识树吧！",
+                R.drawable.knowledge_tree_level1
+            )
+        }
+
+        binding.apply {
+            tvTreeLevel.text = level
+            tvTreeDescription.text = description
+            if (ivTree.tag != drawable) {
+                ivTree.tag = drawable
+                ivTree.setImageResource(drawable)
+                ivTree.startAnimation(AnimationUtils.loadAnimation(this@KnowledgeDetailActivity, R.anim.tree_grow))
+            }
+        }
+    }
+
+    private fun uploadSuccess() {
+        documentCount++
+        updateTreeLevel(documentCount)
+        Toast.makeText(this, "知识树获得了新的养分！", Toast.LENGTH_SHORT).show()
+        loadDocuments()
     }
 } 
