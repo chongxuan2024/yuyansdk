@@ -23,6 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:gravity="center"
         android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -30,7 +31,7 @@
             android:id="@+id/etUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
             android:hint="用户名" />
 
         <EditText
@@ -38,31 +39,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="邮箱"
-            android:inputType="textEmailAddress"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:inputType="textEmailAddress"/>
 
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="密码"
-            android:inputType="textPassword"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:inputType="textPassword"/>
 
         <EditText
             android:id="@+id/etConfirmPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="确认密码"
-            android:inputType="textPassword"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginBottom="24dp"
+            android:inputType="textPassword"/>
 
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="注册"
-            android:layout_marginTop="24dp"/>
+            android:text="注册（暂未开放）"/>
 
     </LinearLayout>
 
