@@ -52,7 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="AI提示词模版"
+        android:text="AI提示词模版（开发中）"
         android:textStyle="bold"/>
 
     <Spinner
