@@ -199,15 +199,16 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+
     private fun showUploadDialog() {
         val items = arrayOf(
-            "添加知识装饰 🎁",
-            "上传知识彩球 🎄",
-            "分享知识星星 ⭐",
-            "导入知识礼物 🎀"
+            "添加知识文本 🌱",
+            "上传知识文件 🌿",
+            "分享知识图片 🍃",
+            "导入网页内容 🌸"
         )
         AlertDialog.Builder(this)
-            .setTitle("为圣诞树添加装饰")
+            .setTitle("为知识树添加养分")
             .setItems(items) { _, which ->
                 when (which) {
                     0 -> showTextInputDialog()
