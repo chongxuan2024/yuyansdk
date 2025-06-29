@@ -444,8 +444,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun showDeleteConfirmDialog(document: Document) {
         AlertDialog.Builder(this)
-            .setTitle("修剪圣诞树")
-            .setMessage("确定要移除这个知识装饰吗？这可能会影响圣诞树的生长。")
+            .setTitle("修剪知识树")
+            .setMessage("确定要移除这个知识吗？这可能会影响知识树的生长。")
             .setPositiveButton("确定") { _, _ ->
                 deleteDocument(document)
             }
@@ -508,9 +508,9 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         val actualCount = minOf(documentCount, 9)  // 限制最大层级为20
         val level = "知识树 Level $actualCount"
         val description = when (actualCount) {
-            9 -> "恭喜！你的知识树已经长到最高啦！🌟"
-            in 7..8 -> "你的知识树已经非常高大了，继续加油！🎄"
-            in 4..6 -> "知识树茁壮成长中，装饰也越来越漂亮了！🎁"
+            15 -> "恭喜！你的知识树已经长到最高啦！🌟"
+            in 10..15 -> "你的知识树已经非常高大了，继续加油！🎄"
+            in 4..9 -> "知识树茁壮成长中，装饰也越来越漂亮了！🎁"
             in 1..3 -> "知识树正在慢慢长高，继续添加知识吧！🎀"
             else -> "开始养育你的小知识树吧！⭐"
         }
@@ -533,11 +533,11 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun uploadSuccess() {
         documentCount++
-        val actualCount = minOf(documentCount, 9)
+        val actualCount = minOf(documentCount, 15)
         updateTreeLevel(documentCount)
         val message = when {
-            actualCount >= 9 -> "知识树已经长到最高啦！🌟"
-            actualCount >= 5 -> "知识树又长高了，真是棒极了！🎄"
+            actualCount >= 15 -> "知识树已经长到最高啦！🌟"
+            actualCount >= 6 -> "知识树又长高了，真是棒极了！🎄"
             else -> "知识树长高了一层！⭐"
         }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

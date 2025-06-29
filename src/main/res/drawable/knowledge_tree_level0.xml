@@ -1,14 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="200dp"
     android:height="200dp"
-    android:viewportWidth="100"
-    android:viewportHeight="100">
-    
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- 圣诞树主体 - 15层从上到下 -->
+
+
+
     <!-- 树干 -->
     <path
         android:fillColor="#8B4513"
-        android:pathData="M45,85 L55,85 L55,95 L45,95 Z"/>
+        android:pathData="M90,166 L110,166 L110,190 L90,190 Z"/>
 
-        
+    <!-- 树干底座 -->
+    <path
+        android:fillColor="#654321"
+        android:pathData="M75,190 L125,190 L125,260 L75,260 Z"/>
+
+
+
+
+
+
 </vector>

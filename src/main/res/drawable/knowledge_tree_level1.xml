@@ -1,37 +1,52 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="200dp"
     android:height="200dp"
-    android:viewportWidth="100"
-    android:viewportHeight="100">
-    
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- 圣诞树主体 - 15层从上到下 -->
+
+
+    <!-- 第15层 - 平滑树叶 -->
+    <path
+        android:fillColor="#198754"
+        android:pathData="M100,155 Q27,165 20,170 Q27,168 100,166 Q173,168 180,170 Q173,165 100,155 Z"/>
+
+    <!-- 第15层彩球 -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M50,167 Q48,167 48,169 Q48,171 50,171 Q52,171 52,169 Q52,167 50,167 Z"/>
+    <path
+        android:fillColor="#00FF7F"
+        android:pathData="M135,166 Q133,166 133,168 Q133,170 135,170 Q137,170 137,168 Q137,166 135,166 Z"/>
+
+    <!-- 雪花 - 中部偏左 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.6"
+        android:pathData="M45,110 L49,114 M45,112 L49,112 M47,110 L47,114"/>
+
+    <!-- 雪花 - 左侧上部 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.8"
+        android:pathData="M30,65 L36,71 M30,68 L36,68 M33,65 L33,71"/>
+
+
+
     <!-- 树干 -->
     <path
         android:fillColor="#8B4513"
-        android:pathData="M45,85 L55,85 L55,95 L45,95 Z"/>
-    
-    <!-- 第一层树叶 -->
-    <path
-        android:fillColor="#2E8B57"
-        android:pathData="M32,85 L68,85 L50,80 Z"/>
+        android:pathData="M90,166 L110,166 L110,190 L90,190 Z"/>
 
-    <!-- 装饰球1-3 -->
+    <!-- 树干底座 -->
     <path
-        android:fillColor="#FF0000"
-        android:pathData="M42,83 C41,83 41,84 42,84 C43,84 43,83 42,83"/>
-    <path
-        android:fillColor="#FFD700"
-        android:pathData="M58,83 C57,83 57,84 58,84 C59,84 59,83 58,83"/>
-    <path
-        android:fillColor="#4169E1"
-        android:pathData="M50,80 C49,80 49,81 50,81 C51,81 51,80 50,80"/>
-        
-    <!-- 小彩灯1-2 -->
-    <path
-        android:fillColor="#FFFF00"
-        android:pathData="M45,81 L46,81"/>
-    <path
-        android:fillColor="#00FF00"
-        android:pathData="M55,78 L56,78"/>
-        
+        android:fillColor="#654321"
+        android:pathData="M75,190 L125,190 L125,260 L75,260 Z"/>
+
+
+
+
+
+
 </vector>

@@ -8,6 +8,68 @@
 
 
 
+
+    <!-- 第5层 - 平滑树叶 -->
+    <path
+        android:fillColor="#198754"
+        android:pathData="M100,55 Q77,65 70,70 Q77,68 100,66 Q123,68 130,70 Q123,65 100,55 Z"/>
+
+    <!-- 第5层彩球 -->
+    <path
+        android:fillColor="#800080"
+        android:pathData="M125,67 Q123,67 123,69 Q123,71 125,71 Q127,71 127,69 Q127,67 125,67 Z"/>
+    <path
+        android:fillColor="#FFA500"
+        android:pathData="M80,68 Q78,68 78,70 Q78,72 80,72 Q82,72 82,70 Q82,68 80,68 Z"/>
+
+
+    <!-- 雪花 - 下部中央 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.4"
+        android:pathData="M100,180 L103,183 M100,181.5 L103,181.5 M101.5,180 L101.5,183"/>
+
+
+
+
+
+    <!-- 第6层 - 平滑树叶 -->
+    <path
+        android:fillColor="#0F5132"
+        android:pathData="M100,65 Q72,75 65,80 Q72,78 100,76 Q128,78 135,80 Q128,75 100,65 Z"/>
+
+    <!-- 第6层彩球 -->
+    <path
+        android:fillColor="#00FFFF"
+        android:pathData="M105,75 Q103,75 103,77 Q103,79 105,79 Q107,79 107,77 Q107,75 105,75 Z"/>
+    <!-- 雪花 - 右侧上部 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.4"
+        android:pathData="M160,60 L163,63 M160,61.5 L163,61.5 M161.5,60 L161.5,63"/>
+
+
+
+    <!-- 第7层 - 平滑树叶 -->
+    <path
+        android:fillColor="#198754"
+        android:pathData="M100,75 Q67,85 60,90 Q67,88 100,86 Q133,88 140,90 Q133,85 100,75 Z"/>
+
+    <!-- 第7层彩球 -->
+    <path
+        android:fillColor="#32CD32"
+        android:pathData="M70,87 Q68,87 68,89 Q68,91 70,91 Q72,91 72,89 Q72,87 70,87 Z"/>
+    <path
+        android:fillColor="#FF1493"
+        android:pathData="M130,88 Q128,88 128,90 Q128,92 130,92 Q132,92 132,90 Q132,88 130,88 Z"/>
+
+    <!-- 雪花 - 右侧下部 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.5"
+        android:pathData="M165,120 L169,124 M165,122 L169,122 M167,120 L167,124"/>
+
+
     <!-- 第8层 - 平滑树叶 -->
     <path
         android:fillColor="#0F5132"

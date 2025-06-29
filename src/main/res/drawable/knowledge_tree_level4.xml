@@ -1,69 +1,118 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="200dp"
     android:height="200dp"
-    android:viewportWidth="100"
-    android:viewportHeight="100">
-    
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- 圣诞树主体 - 15层从上到下 -->
+
+ 
+
+
+
+
+
+    <!-- 第12层 - 平滑树叶 -->
+    <path
+        android:fillColor="#0F5132"
+        android:pathData="M100,125 Q42,135 35,140 Q42,138 100,136 Q158,138 165,140 Q158,135 100,125 Z"/>
+
+    <!-- 第12层彩球 -->
+    <path
+        android:fillColor="#7B68EE"
+        android:pathData="M120,136 Q118,136 118,138 Q118,140 120,140 Q122,140 122,138 Q122,136 120,136 Z"/>
+
+    <!-- 雪花 - 左下角 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.4"
+        android:pathData="M20,160 L23,163 M20,161.5 L23,161.5 M21.5,160 L21.5,163"/>
+
+
+
+
+    <!-- 第13层 - 平滑树叶 -->
+    <path
+        android:fillColor="#198754"
+        android:pathData="M100,135 Q37,145 30,150 Q37,148 100,146 Q163,148 170,150 Q163,145 100,135 Z"/>
+
+    <!-- 第13层彩球 -->
+    <path
+        android:fillColor="#00CED1"
+        android:pathData="M65,147 Q63,147 63,149 Q63,151 65,151 Q67,151 67,149 Q67,147 65,147 Z"/>
+    <path
+        android:fillColor="#FF6347"
+        android:pathData="M155,148 Q153,148 153,150 Q153,152 155,152 Q157,152 157,150 Q157,148 155,148 Z"/>
+
+    <!-- 雪花 - 上部中央偏左 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.5"
+        android:pathData="M60,30 L64,34 M60,32 L64,32 M62,30 L62,34"/>
+
+
+
+    <!-- 第14层 - 平滑树叶 -->
+    <path
+        android:fillColor="#0F5132"
+        android:pathData="M100,145 Q32,155 25,160 Q32,158 100,156 Q168,158 175,160 Q168,155 100,145 Z"/>
+
+    <!-- 第14层彩球 -->
+    <path
+        android:fillColor="#9932CC"
+        android:pathData="M95,155 Q93,155 93,157 Q93,159 95,159 Q97,159 97,157 Q97,155 95,155 Z"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M170,158 Q168,158 168,160 Q168,162 170,162 Q172,162 172,160 Q172,158 170,158 Z"/>
+
+
+    <!-- 雪花 - 上部中央偏右 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.7"
+        android:pathData="M140,45 L145,50 M140,47.5 L145,47.5 M142.5,45 L142.5,50"/>
+
+
+    <!-- 第15层 - 平滑树叶 -->
+    <path
+        android:fillColor="#198754"
+        android:pathData="M100,155 Q27,165 20,170 Q27,168 100,166 Q173,168 180,170 Q173,165 100,155 Z"/>
+
+    <!-- 第15层彩球 -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M50,167 Q48,167 48,169 Q48,171 50,171 Q52,171 52,169 Q52,167 50,167 Z"/>
+    <path
+        android:fillColor="#00FF7F"
+        android:pathData="M135,166 Q133,166 133,168 Q133,170 135,170 Q137,170 137,168 Q137,166 135,166 Z"/>
+
+    <!-- 雪花 - 中部偏左 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.6"
+        android:pathData="M45,110 L49,114 M45,112 L49,112 M47,110 L47,114"/>
+
+    <!-- 雪花 - 左侧上部 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.8"
+        android:pathData="M30,65 L36,71 M30,68 L36,68 M33,65 L33,71"/>
+
+
+
     <!-- 树干 -->
     <path
         android:fillColor="#8B4513"
-        android:pathData="M45,85 L55,85 L55,95 L45,95 Z"/>
-    
-    <!-- 第一层树叶 -->
-    <path
-        android:fillColor="#2E8B57"
-        android:pathData="M30,85 L70,85 L50,78 Z"/>
-        
-    <!-- 第二层树叶 -->
-    <path
-        android:fillColor="#228B22"
-        android:pathData="M33,81 L67,81 L50,74 Z"/>
-        
-    <!-- 第三层树叶 -->
-    <path
-        android:fillColor="#006400"
-        android:pathData="M36,77 L64,77 L50,70 Z"/>
-        
-    <!-- 第四层树叶 -->
-    <path
-        android:fillColor="#2E8B57"
-        android:pathData="M39,73 L61,73 L50,66.5 Z"/>
-        
-    <!-- 装饰球1-4 -->
-    <path
-        android:fillColor="#FF0000"
-        android:pathData="M40,83 C39,83 39,84 40,84 C41,84 41,83 40,83"/>
-    <path
-        android:fillColor="#FFD700"
-        android:pathData="M60,83 C59,83 59,84 60,84 C61,84 61,83 60,83"/>
-    <path
-        android:fillColor="#4169E1"
-        android:pathData="M45,79 C44,79 44,80 45,80 C46,80 46,79 45,79"/>
-    <path
-        android:fillColor="#FF69B4"
-        android:pathData="M55,75 C54,75 54,76 55,76 C56,76 56,75 55,75"/>
-        
-    <!-- 小彩灯1-3 -->
-    <path
-        android:fillColor="#FFFF00"
-        android:pathData="M43,80 L44,80"/>
-    <path
-        android:fillColor="#00FF00"
-        android:pathData="M57,76 L58,76"/>
-    <path
-        android:fillColor="#FF00FF"
-        android:pathData="M50,72 L51,72"/>
-        
-    <!-- 礼物盒1 -->
-    <path
-        android:fillColor="#FF1493"
-        android:pathData="M30,85 L38,85 L38,95 L30,95 Z"/>
-    <path
-        android:fillColor="#FFD700"
-        android:pathData="M33,85 L35,85 L35,95 L33,95 Z"/>
-    <path
-        android:fillColor="#FFD700"
-        android:pathData="M30,89 L38,89 L38,91 L30,91 Z"/>
+        android:pathData="M90,166 L110,166 L110,190 L90,190 Z"/>
 
-</vector> 
+    <!-- 树干底座 -->
+    <path
+        android:fillColor="#654321"
+        android:pathData="M75,190 L125,190 L125,260 L75,260 Z"/>
+
+
+
+
+
+
+</vector>
