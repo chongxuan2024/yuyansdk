@@ -1,6 +1,7 @@
 package com.yuyan.imemodule.ui.knowledge
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -15,7 +16,8 @@ import com.yuyan.imemodule.databinding.ItemKnowledgeBaseBinding
 class KnowledgeBaseAdapter(
     private val isAdmin: Boolean,
     private val onItemClick: (KnowledgeBase) -> Unit,
-    private val onMemberClick: (KnowledgeBase) -> Unit
+    private val onMemberClick: (KnowledgeBase) -> Unit,
+    private val onDeleteClick: (KnowledgeBase) -> Unit
 ) : ListAdapter<KnowledgeBase, KnowledgeBaseAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -86,6 +88,12 @@ class KnowledgeBaseAdapter(
                         binding.chipGroupMembers.addView(this)
                     }
                 }
+            }
+            
+            // 显示或隐藏删除按钮
+            binding.btnDelete.visibility = if (isAdmin) View.VISIBLE else View.GONE
+            binding.btnDelete.setOnClickListener {
+                onDeleteClick(item)
             }
         }
     }

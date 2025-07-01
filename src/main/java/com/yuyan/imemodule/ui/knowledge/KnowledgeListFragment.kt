@@ -6,14 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.yuyan.imemodule.R
 import com.yuyan.imemodule.data.model.KnowledgeBase
 import com.yuyan.imemodule.data.model.Member
 import com.yuyan.imemodule.data.model.PaymentType
 import com.yuyan.imemodule.data.model.Role
 import com.yuyan.imemodule.data.model.TemplateType
 import com.yuyan.imemodule.databinding.FragmentKnowledgeListBinding
+import com.yuyan.imemodule.prefs.restore
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -94,6 +97,9 @@ class KnowledgeListFragment : Fragment() {
                 if (isAdmin) {
                     showMemberManagementDialog(knowledgeBase)
                 }
+            },
+            onDeleteClick = { knowledgeBase ->
+                showDeleteConfirmDialog(knowledgeBase)
             }
         )
         binding.rvKnowledgeList.apply {
@@ -197,6 +203,64 @@ class KnowledgeListFragment : Fragment() {
 
     private fun showMemberManagementDialog(knowledgeBase: KnowledgeBase) {
         // TODO: 实现成员管理对话框
+    }
+
+    private fun showDeleteConfirmDialog(knowledgeBase: KnowledgeBase) {
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("删除知识库")
+            .setMessage("确定要删除知识库《${knowledgeBase.name}》吗？此操作不可恢复。")
+            .setPositiveButton("确定") { _, _ ->
+                deleteKnowledgeBase(knowledgeBase)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun deleteKnowledgeBase(knowledgeBase: KnowledgeBase) {
+        val user = UserManager.getCurrentUser() ?: return
+
+        val request = Request.Builder()
+            .url("https://www.qingmiao.cloud/userapi/knowledge/delete/${knowledgeBase.id}")
+            .addHeader("Authorization", user.token)
+            .addHeader("openid", user.username)
+            .delete()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                activity?.runOnUiThread {
+                    Toast.makeText(context, "删除失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                activity?.runOnUiThread {
+                    if (response.isSuccessful && responseBody != null) {
+                        try {
+                            val jsonResponse = JSONObject(responseBody)
+                            if (jsonResponse.getBoolean("success")) {
+                                Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show()
+                                loadKnowledgeBases() // 重新加载列表
+                            } else {
+                                Toast.makeText(context, 
+                                    jsonResponse.getString("message"), 
+                                    Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, 
+                                "删除失败: ${e.message}", 
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(context, 
+                            "删除失败: ${response.code}", 
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
     }
 
     override fun onDestroyView() {
