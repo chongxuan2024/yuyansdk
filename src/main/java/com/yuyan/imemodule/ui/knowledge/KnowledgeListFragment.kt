@@ -83,6 +83,7 @@ class KnowledgeListFragment : Fragment() {
                     KnowledgeDetailActivity.createIntent(
                         requireContext(),
                         knowledgeBase.id,
+                        knowledgeBase.name,
                         isAdmin
                     )
                 )

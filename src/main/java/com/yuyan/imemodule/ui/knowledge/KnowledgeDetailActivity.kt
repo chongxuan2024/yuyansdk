@@ -38,19 +38,22 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
         .build()
     private lateinit var knowledgeId: String
+    private lateinit var knowledgeName: String
     private var isAdmin: Boolean = false
     private var documentCount = 0
 
     companion object {
         private const val EXTRA_KNOWLEDGE_ID = "knowledge_id"
+        private const val EXTRA_KNOWLEDGE_NAME = "knowledge_name"
         private const val EXTRA_IS_ADMIN = "is_admin"
         private const val REQUEST_PICK_FILE = 1
         private const val EXTRA_KNOWLEDGE_BASE_ID = "extra_knowledge_base_id"
         private const val MENU_MEMBER = Menu.FIRST + 1
 
-        fun createIntent(context: Context, knowledgeId: String, isAdmin: Boolean): Intent {
+        fun createIntent(context: Context, knowledgeId: String,knowledgeName: String, isAdmin: Boolean): Intent {
             return Intent(context, KnowledgeDetailActivity::class.java).apply {
                 putExtra(EXTRA_KNOWLEDGE_ID, knowledgeId)
+                putExtra(EXTRA_KNOWLEDGE_NAME, knowledgeName)
                 putExtra(EXTRA_IS_ADMIN, isAdmin)
             }
         }
@@ -62,6 +65,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         knowledgeId = intent.getStringExtra(EXTRA_KNOWLEDGE_ID) ?: return finish()
+        knowledgeName = intent.getStringExtra(EXTRA_KNOWLEDGE_NAME) ?: return finish()
         isAdmin = intent.getBooleanExtra(EXTRA_IS_ADMIN, false)
 
         setupToolbar()
@@ -73,7 +77,9 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.title = knowledgeName
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
     }
 
     private fun setupFab() {
@@ -152,7 +158,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                             if (jsonResponse.getBoolean("success")) {
                                 val documents = mutableListOf<Document>()
                                 val dataArray = jsonResponse.getJSONArray("data")
-                                
+
                                 for (i in 0 until dataArray.length()) {
                                     val item = dataArray.getJSONObject(i)
                                     documents.add(
