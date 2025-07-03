@@ -47,7 +47,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         private const val EXTRA_KNOWLEDGE_NAME = "knowledge_name"
         private const val EXTRA_IS_ADMIN = "is_admin"
         private const val REQUEST_PICK_FILE = 1
-        const val EXTRA_SHARED_URI = "extra_shared_uri"
+        const val EXTRA_SHARED_URIS = "extra_shared_uris"
         const val EXTRA_SHARED_TEXT = "extra_shared_text"
         private const val EXTRA_KNOWLEDGE_BASE_ID = "extra_knowledge_base_id"
         private const val MENU_MEMBER = Menu.FIRST + 1
@@ -556,9 +556,11 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     }
 
     private fun handleSharedContent() {
-        // 处理分享的文件
-        intent.getParcelableExtra<Uri>(EXTRA_SHARED_URI)?.let { uri ->
-            uploadFile(uri)
+        // 处理分享的文件列表
+        intent.getParcelableArrayListExtra<Uri>(EXTRA_SHARED_URIS)?.let { uris ->
+            for (uri in uris) {
+                uploadFile(uri)
+            }
         }
 
         // 处理分享的文本
