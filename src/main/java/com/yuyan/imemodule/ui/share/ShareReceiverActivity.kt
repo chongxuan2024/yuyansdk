@@ -33,10 +33,7 @@ class ShareReceiverActivity : AppCompatActivity() {
                 handleSendFile(intent)
             }
             intent?.action == Intent.ACTION_SEND_MULTIPLE -> {
-                if (intent.type?.startsWith("image/") == true ||
-                    intent.type?.startsWith("application/") == true) {
-                    handleSendMultipleFiles(intent)
-                }
+                handleSendMultipleFiles(intent)
             }
             else -> {
                 finish()
