@@ -6,6 +6,7 @@ data class KnowledgeBase(
     val paymentType: PaymentType,
     val templateType: TemplateType,
     val owner: String,
+    val creatorUser: String,
     val createdAt: Long,
     val members: List<Member> = emptyList()
 )
