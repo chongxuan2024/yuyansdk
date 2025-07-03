@@ -46,7 +46,7 @@ import com.yuyan.imemodule.data.model.TemplateType
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-private const val AI_BUTTON_TEXT = "AI咨询"
+private const val AI_BUTTON_TEXT = "AI回复"
 private const val AI_BUTTON_TEXT_RETRY = "重新生成"
 
 /**

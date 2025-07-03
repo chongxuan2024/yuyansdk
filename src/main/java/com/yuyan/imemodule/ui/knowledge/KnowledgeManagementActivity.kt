@@ -87,7 +87,7 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> "我的知识库"
-                else -> "已授权知识库"
+                else -> "被共享的知识库"
             }
         }.attach()
 
