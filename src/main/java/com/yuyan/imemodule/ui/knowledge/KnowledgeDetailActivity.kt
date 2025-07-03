@@ -47,10 +47,12 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         private const val EXTRA_KNOWLEDGE_NAME = "knowledge_name"
         private const val EXTRA_IS_ADMIN = "is_admin"
         private const val REQUEST_PICK_FILE = 1
+        const val EXTRA_SHARED_URI = "extra_shared_uri"
+        const val EXTRA_SHARED_TEXT = "extra_shared_text"
         private const val EXTRA_KNOWLEDGE_BASE_ID = "extra_knowledge_base_id"
         private const val MENU_MEMBER = Menu.FIRST + 1
 
-        fun createIntent(context: Context, knowledgeId: String,knowledgeName: String, isAdmin: Boolean): Intent {
+        fun createIntent(context: Context, knowledgeId: String, knowledgeName: String, isAdmin: Boolean): Intent {
             return Intent(context, KnowledgeDetailActivity::class.java).apply {
                 putExtra(EXTRA_KNOWLEDGE_ID, knowledgeId)
                 putExtra(EXTRA_KNOWLEDGE_NAME, knowledgeName)
@@ -73,6 +75,9 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         setupFab()
         loadDocuments()
         setupTreeAnimation()
+
+        // 处理分享的内容
+        handleSharedContent()
     }
 
     private fun setupToolbar() {
@@ -548,5 +553,17 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         loadDocuments()
+    }
+
+    private fun handleSharedContent() {
+        // 处理分享的文件
+        intent.getParcelableExtra<Uri>(EXTRA_SHARED_URI)?.let { uri ->
+            uploadFile(uri)
+        }
+
+        // 处理分享的文本
+        intent.getStringExtra(EXTRA_SHARED_TEXT)?.let { text ->
+            uploadText(text)
+        }
     }
 } 

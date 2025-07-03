@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.yuyan.imemodule">
     <uses-permission android:name="android.permission.VIBRATE" />
     <queries>
         <intent>
@@ -73,6 +74,19 @@
             android:name=".ui.knowledge.KnowledgeMemberActivity"
             android:label="@string/knowledge_member"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+        <activity
+            android:name=".ui.share.ShareReceiverActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.Dialog">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="application/*" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
