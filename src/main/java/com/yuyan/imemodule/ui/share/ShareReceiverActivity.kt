@@ -21,7 +21,7 @@ import java.time.ZoneId
 
 class ShareReceiverActivity : AppCompatActivity() {
     private val client = OkHttpClient()
-    private var sharedUri: Uri? = null
+    private var sharedUris: ArrayList<Uri>? = null
     private var sharedText: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +47,7 @@ class ShareReceiverActivity : AppCompatActivity() {
 
     private fun handleSendFile(intent: Intent) {
         (intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM))?.let {
-            sharedUri = it
+            sharedUris = arrayListOf(it)
         }
     }
 
@@ -60,8 +60,7 @@ class ShareReceiverActivity : AppCompatActivity() {
     private fun handleSendMultipleFiles(intent: Intent) {
         intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)?.let { uris ->
             if (uris.isNotEmpty()) {
-                // 目前只处理第一个文件
-                sharedUri = uris[0]
+                sharedUris = uris
             }
         }
     }
@@ -117,6 +116,7 @@ class ShareReceiverActivity : AppCompatActivity() {
                                         templateType = TemplateType.valueOf(item.getString("aiTemplate")),
                                         owner = item.getString("creatorId"),
                                         createdAt = zonedDateTime.toInstant().toEpochMilli() ,
+                                        creatorUser = item.getString("creatorUser"),
                                         members = emptyList() // 暂时使用空列表，因为响应中没有 members 字段
                                     )
                                 )
@@ -163,8 +163,8 @@ class ShareReceiverActivity : AppCompatActivity() {
             knowledgeBase.name,
             true
         ).apply {
-            // 传递分享的文件 URI 或文本
-            sharedUri?.let { putExtra(KnowledgeDetailActivity.EXTRA_SHARED_URI, it) }
+            // 传递分享的文件 URI 列表或文本
+            sharedUris?.let { putParcelableArrayListExtra(KnowledgeDetailActivity.EXTRA_SHARED_URIS, it) }
             sharedText?.let { putExtra(KnowledgeDetailActivity.EXTRA_SHARED_TEXT, it) }
         }
         startActivity(intent)

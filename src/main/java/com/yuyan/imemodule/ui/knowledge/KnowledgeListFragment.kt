@@ -177,6 +177,7 @@ class KnowledgeListFragment : Fragment() {
                                             templateType = TemplateType.valueOf(item.getString("aiTemplate")),
                                             owner = item.getString("creatorId"),
                                             createdAt = zonedDateTime.toInstant().toEpochMilli() ,
+                                            creatorUser = item.getString("creatorUser"),
                                             members = emptyList() // 暂时使用空列表，因为响应中没有 members 字段
                                         )
                                     )
