@@ -27,13 +27,16 @@ class ShareReceiverActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // 处理分享意图
-        when {
-            intent?.action == Intent.ACTION_SEND -> {
+        // 处理意图
+        when (intent?.action) {
+            Intent.ACTION_SEND -> {
                 handleSendFile(intent)
             }
-            intent?.action == Intent.ACTION_SEND_MULTIPLE -> {
+            Intent.ACTION_SEND_MULTIPLE -> {
                 handleSendMultipleFiles(intent)
+            }
+            Intent.ACTION_VIEW -> {
+                handleViewFile(intent)
             }
             else -> {
                 finish()
@@ -62,6 +65,12 @@ class ShareReceiverActivity : AppCompatActivity() {
             if (uris.isNotEmpty()) {
                 sharedUris = uris
             }
+        }
+    }
+
+    private fun handleViewFile(intent: Intent) {
+        intent.data?.let { uri ->
+            sharedUris = arrayListOf(uri)
         }
     }
 
@@ -98,13 +107,11 @@ class ShareReceiverActivity : AppCompatActivity() {
                     try {
                         val jsonResponse = JSONObject(responseBody)
                         if (jsonResponse.getBoolean("success")) {
-
                             val knowledgeBases = mutableListOf<KnowledgeBase>()
                             val dataArray = jsonResponse.getJSONArray("data")
                             for (i in 0 until dataArray.length()) {
                                 val item = dataArray.getJSONObject(i)
                                 val localDateTime = LocalDateTime.parse(item.getString("createTime"))
-                                // 指定时区（比如 UTC）
                                 val zoneId = ZoneId.of("UTC")
                                 val zonedDateTime = localDateTime.atZone(zoneId)
 
@@ -115,9 +122,9 @@ class ShareReceiverActivity : AppCompatActivity() {
                                         paymentType = PaymentType.valueOf(item.getString("paymentType")),
                                         templateType = TemplateType.valueOf(item.getString("aiTemplate")),
                                         owner = item.getString("creatorId"),
-                                        createdAt = zonedDateTime.toInstant().toEpochMilli() ,
-                                        creatorUser = item.getString("creatorUser"),
-                                        members = emptyList() // 暂时使用空列表，因为响应中没有 members 字段
+                                        createdAt = zonedDateTime.toInstant().toEpochMilli(),
+                                        creatorUser = item.optString("creatorUser"),
+                                        members = emptyList()
                                     )
                                 )
                             }
@@ -145,7 +152,15 @@ class ShareReceiverActivity : AppCompatActivity() {
             return
         }
 
-        val items = knowledgeBases.map { it.name }.toTypedArray()
+        val items = knowledgeBases.map { 
+            buildString {
+                append(it.name)
+//                it.creatorUser?.let { creator ->
+//                    append(" (创建者: $creator)")
+//                }
+            }
+        }.toTypedArray()
+
         AlertDialog.Builder(this)
             .setTitle("选择知识库")
             .setItems(items) { _, which ->
