@@ -12,6 +12,11 @@ import com.yuyan.imemodule.data.model.PaymentType
 import com.yuyan.imemodule.data.model.Role
 import com.yuyan.imemodule.data.model.TemplateType
 import com.yuyan.imemodule.databinding.ItemKnowledgeBaseBinding
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
 
 class KnowledgeBaseAdapter(
     private val isAdmin: Boolean,
@@ -58,6 +63,19 @@ class KnowledgeBaseAdapter(
                 TemplateType.CUSTOMER_SERVICE -> "售后服务"
                 TemplateType.CUSTOM -> "自定义"
             }
+            val creator = item.creatorUser
+            if (creator != "null") {
+                binding.tvCreator.text = creator
+            }
+
+
+            val timestamp = item.createdAt
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val date = sdf.format(Date(timestamp))
+            binding.tvCreateTime.text = buildString {
+                append(date)
+            }
+
 
             binding.chipGroupMembers.removeAllViews()
             if (isAdmin) {
