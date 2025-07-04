@@ -27,5 +27,6 @@ val menuSkbFunsPreset: Map<SkbMenuMode, SkbFunItem> = hashMapOf(
     SkbMenuMode.ClearClipBoard to SkbFunItem(ImeSdkApplication.context.getString(R.string.clipboard_clear), R.drawable.ic_menu_delete, SkbMenuMode.ClearClipBoard),
     SkbMenuMode.Emoticon to SkbFunItem(ImeSdkApplication.context.getString(R.string.emoticons), R.drawable.ic_menu_emoji_emoticons, SkbMenuMode.Emoticon),
     SkbMenuMode.AddPhrases to SkbFunItem(ImeSdkApplication.context.getString(R.string.add_phrases), R.drawable.ic_menu_plus, SkbMenuMode.AddPhrases),
+    SkbMenuMode.AddAIQuery to SkbFunItem(ImeSdkApplication.context.getString(R.string.add_ai_query), R.drawable.ic_baseline_search_24, SkbMenuMode.AddAIQuery),
     SkbMenuMode.LockClipBoard to SkbFunItem(ImeSdkApplication.context.getString(R.string.lock_view), R.drawable.icon_symbol_lock, SkbMenuMode.LockClipBoard),
     )

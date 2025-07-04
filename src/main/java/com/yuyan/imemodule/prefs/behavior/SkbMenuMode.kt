@@ -35,6 +35,7 @@ enum class SkbMenuMode {
     Emojicon,
     Emoticon,
     LockClipBoard,
+    AddAIQuery,
     Knowledge;
 
     companion object : ManagedPreference.StringLikeCodec<SkbMenuMode> {

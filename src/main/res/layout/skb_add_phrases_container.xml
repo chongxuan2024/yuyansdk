@@ -14,18 +14,50 @@
         android:layout_marginBottom="5dp"
         android:textSize="12sp"
         android:text="@string/add_phrases_input_tips"/>
-    <com.yuyan.imemodule.view.widget.ImeEditText
-        android:id="@+id/et_add_phrases_content"
-        android:theme="@style/Theme.AppTheme"
+<!--    <com.yuyan.imemodule.view.widget.ImeEditText-->
+<!--        android:id="@+id/et_add_phrases_content"-->
+<!--        android:theme="@style/Theme.AppTheme"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textSize="16sp"-->
+<!--        android:padding="10dp"-->
+<!--        android:cursorVisible="true"-->
+<!--        android:focusable="true"-->
+<!--        android:focusableInTouchMode="true"-->
+<!--        android:layout_below="@+id/tv_add_phrases_tips"-->
+<!--        android:background="@null"-->
+<!--        android:lines="3"-->
+<!--        android:hint="@string/add_phrases_input_hint"/>-->
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="10dp"
-        android:cursorVisible="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:layout_below="@+id/tv_add_phrases_tips"
-        android:background="@null"
-        android:lines="3"
-        android:hint="@string/add_phrases_input_hint"/>
+        android:orientation="horizontal">
+
+        <com.yuyan.imemodule.view.widget.ImeEditText
+            android:id="@+id/et_add_phrases_content"
+            android:theme="@style/Theme.AppTheme"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:padding="10dp"
+            android:cursorVisible="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:background="@null"
+            android:maxLines="3"
+            android:hint="文本输入"/>
+
+        <ImageButton
+            android:id="@+id/btn_ai_query_search"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_baseline_search_24"
+            android:contentDescription="搜索"/>
+    </LinearLayout>
+
+
 </RelativeLayout>

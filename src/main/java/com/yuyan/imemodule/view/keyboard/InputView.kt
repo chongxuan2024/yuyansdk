@@ -82,7 +82,10 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
     private val clipboardItemTimeout = getInstance().clipboard.clipboardItemTimeout.getValue()
     private var chinesePrediction = true
     var isAddPhrases = false
+    var isAddAIQuery = false
     private var mEtAddPhrasesContent: ImeEditText? = null
+    private var mSearchButton: ImageButton? = null
+
     private var tvAddPhrasesTips:TextView? = null
     private var service: ImeService
     private var mImeState = ImeState.STATE_IDLE // 当前的输入法状态
@@ -621,6 +624,16 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
         when (skbMenuMode) {
             SkbMenuMode.AddPhrases -> {
                 isAddPhrases = true
+                isAddAIQuery = false
+                DataBaseKT.instance.phraseDao().deleteByContent(extra)
+                KeyboardManager.instance.switchKeyboard(InputModeSwitcherManager.skbLayout)
+                initView(context)
+                mEtAddPhrasesContent?.setText(extra)
+                mEtAddPhrasesContent?.setSelection(extra.length)
+            }
+            SkbMenuMode.AddAIQuery -> {
+                isAddPhrases = true
+                isAddAIQuery = true
                 DataBaseKT.instance.phraseDao().deleteByContent(extra)
                 KeyboardManager.instance.switchKeyboard(InputModeSwitcherManager.skbLayout)
                 initView(context)
@@ -635,6 +648,19 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
     private fun handleAddPhrasesView() {
         mEtAddPhrasesContent =  mAddPhrasesLayout.findViewById(R.id.et_add_phrases_content)
         mEtAddPhrasesContent?.requestFocus()
+
+        mSearchButton = mAddPhrasesLayout.findViewById(R.id.btn_ai_query_search)
+        if(isAddAIQuery){
+            mSearchButton?.visibility = View.VISIBLE
+            mSearchButton?.setOnClickListener {
+
+                addAIQueryHandle()
+            }
+        }else
+        {
+            mSearchButton?.visibility = View.GONE
+        }
+
         tvAddPhrasesTips =  mAddPhrasesLayout.findViewById(R.id.tv_add_phrases_tips)
         val tips = "快捷输入为拼音首字母前4位:"
         mEtAddPhrasesContent?.addTextChangedListener(object : TextWatcher {
@@ -648,6 +674,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
 
     private fun addPhrasesHandle() {
         val content = mEtAddPhrasesContent?.text.toString()
+
         if(content.isNotBlank()) {
             val pinYinHeadChar = com.yuyan.imemodule.libs.pinyin4j.PinyinHelper.getPinYinHeadChar(content)
             val pinYinHeadT9 = pinYinHeadChar.map { T9PinYinUtils.pinyin2T9Key(it)}.joinToString("")
@@ -656,6 +683,19 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
             KeyboardManager.instance.switchKeyboard(InputModeSwitcherManager.skbLayout)
         }
     }
+
+    private fun addAIQueryHandle(){
+        val content = mEtAddPhrasesContent?.text.toString()
+        println("do ai query $content")
+
+        if(content.isNotBlank()) {
+            isAddPhrases = false
+            isAddAIQuery = false
+            initView(context)
+            onSettingsMenuClick(SkbMenuMode.ClipBoard)
+        }
+    }
+
 
     /**
      * 输入法状态: 空闲，输入，联想
@@ -699,8 +739,14 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                     mEtAddPhrasesContent?.onKeyUp(keyCode, KeyEvent(KeyEvent.ACTION_UP, keyCode))
                 }
                 KeyEvent.KEYCODE_ENTER ->{
+                    println("isAddPhrases:$isAddPhrases")
+                    println("isAddAIQuery:$isAddAIQuery")
                     isAddPhrases = false
-                    addPhrasesHandle()
+                    if(!isAddAIQuery){
+                        addPhrasesHandle()
+                    }
+                    isAddAIQuery = false
+
                     initView(context)
                     onSettingsMenuClick(SkbMenuMode.Phrases)
                 }
@@ -830,7 +876,10 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
     fun onWindowHidden() {
         if(isAddPhrases){
             isAddPhrases = false
-            addPhrasesHandle()
+            if(!isAddAIQuery){
+                addPhrasesHandle()
+            }
+            isAddAIQuery = false
             initView(context)
         }
         if(mImeState != ImeState.STATE_IDLE) resetToIdleState()
