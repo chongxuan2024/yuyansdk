@@ -802,7 +802,10 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                                     background = GradientDrawable().apply {
                                         setColor(ThemeManager.activeTheme.keyBackgroundColor)
                                         cornerRadius = 16f
+                                        setStroke(2, ThemeManager.activeTheme.keyTextColor) // 添加边框
+                                        elevation = 10f // 添加阴影
                                     }
+
 
                                     // 标题
                                     addView(TextView(context).apply {
@@ -815,6 +818,10 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                                     
                                     // 滚动视图和编辑框
                                     addView(ScrollView(context).apply {
+                                        layoutParams = LinearLayout.LayoutParams(
+                                            LinearLayout.LayoutParams.MATCH_PARENT,
+                                            DevicesUtils.dip2px(200) // 限制最大高度为 200dp
+                                        )
                                         addView(TextView(context).apply {
                                             text = answer
                                             setTextColor(ThemeManager.activeTheme.keyTextColor)
@@ -822,11 +829,9 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                                             textSize = 14f
                                             background = null
                                             setPadding(20, 20, 20, 20)
+                                            maxLines = 500 // 设置最大行数，避免内存占用过大
                                         })
-                                    }, LinearLayout.LayoutParams(
-                                        LinearLayout.LayoutParams.MATCH_PARENT,
-                                        LinearLayout.LayoutParams.WRAP_CONTENT
-                                    ))
+                                    })
                                 }
 
                                 // 创建 PopupWindow 实例

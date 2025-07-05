@@ -83,11 +83,12 @@ abstract class DataBaseKT : RoomDatabase() {
                 )
                 instance.phraseDao().insertAll(phrases)
             }
+            instance.skbFunDao().deleteAll();
             if(instance.skbFunDao().getAllMenu().isEmpty()) {
                 val skbFuns = listOf(
+                    SkbFun(name = SkbMenuMode.AddAIQuery.name, isKeep = 1),
                     SkbFun(name = SkbMenuMode.ClipBoard.name, isKeep = 1),
                     SkbFun(name = SkbMenuMode.Emojicon.name, isKeep = 1),
-                    SkbFun(name = SkbMenuMode.Knowledge.name, isKeep = 1),
 
                     SkbFun(name = SkbMenuMode.Emojicon.name, isKeep = 0, position = 0),
                     SkbFun(name = SkbMenuMode.SwitchKeyboard.name, isKeep = 0, position = 1),
@@ -105,6 +106,7 @@ abstract class DataBaseKT : RoomDatabase() {
                     SkbFun(name = SkbMenuMode.FlowerTypeface.name, isKeep = 0, position = 13),
                     SkbFun(name = SkbMenuMode.Custom.name, isKeep = 0, position = 14),
                     SkbFun(name = SkbMenuMode.Settings.name, isKeep = 0, position = 15),
+                    SkbFun(name = SkbMenuMode.AddAIQuery.name, isKeep = 0, position = 16),
                 )
                 instance.skbFunDao().insertAll(skbFuns)
             }
