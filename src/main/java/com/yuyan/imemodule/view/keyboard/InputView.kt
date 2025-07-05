@@ -802,95 +802,108 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                             if (jsonResponse.has("text")) {
                                 val answer = jsonResponse.getString("text")
 
-                                // 创建结果视图
-                                val resultView = LinearLayout(context).apply {
-                                    orientation = LinearLayout.VERTICAL
-                                    setPadding(30, 20, 30, 20)
-                                    background = GradientDrawable().apply {
-                                        setColor(ThemeManager.activeTheme.keyBackgroundColor)
-                                        cornerRadius = 16f
-                                        setStroke(2, ThemeManager.activeTheme.keyTextColor) // 添加边框
-                                        elevation = 10f // 添加阴影
-                                    }
+
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("AI回答", answer)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+                                isAddPhrases = false
+                                isAddAIQuery = false
+                                initView(context)
+                                onSettingsMenuClick(SkbMenuMode.ClipBoard)
 
 
-                                    // 标题
-                                    addView(TextView(context).apply {
-                                        text = "AI回答"
-                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
-                                        textSize = 18f
-                                        gravity = Gravity.CENTER
-                                        setPadding(0, 0, 0, 20)
-                                    })
-                                    
-                                    // 滚动视图和编辑框
-                                    addView(ScrollView(context).apply {
-                                        layoutParams = LinearLayout.LayoutParams(
-                                            LinearLayout.LayoutParams.MATCH_PARENT,
-                                            DevicesUtils.dip2px(200) // 限制最大高度为 200dp
-                                        )
-                                        addView(TextView(context).apply {
-                                            text = answer
-                                            setTextColor(ThemeManager.activeTheme.keyTextColor)
-                                            gravity = Gravity.TOP or Gravity.START
-                                            textSize = 14f
-                                            background = null
-                                            setPadding(20, 20, 20, 20)
-                                            maxLines = 500 // 设置最大行数，避免内存占用过大
-                                        })
-                                    })
-                                }
 
-                                // 创建 PopupWindow 实例
-                                val resultPopup = PopupWindow(
-                                    resultView,
-                                    WindowManager.LayoutParams.WRAP_CONTENT,
-                                    WindowManager.LayoutParams.WRAP_CONTENT
-                                ).apply {
-                                    isOutsideTouchable = true
-                                    isFocusable = true
-                                    setBackgroundDrawable(null)
-                                }
 
-                                // 添加按钮容器
-                                resultView.addView(LinearLayout(context).apply {
-                                    orientation = LinearLayout.HORIZONTAL
-                                    gravity = Gravity.END
-                                    setPadding(0, 20, 0, 0)
-                                    
-                                    // 取消按钮
-                                    addView(Button(context).apply {
-                                        text = "取消"
-                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
-                                        setOnClickListener {
-                                            resultPopup.dismiss()
-                                            isAddPhrases = false
-                                            isAddAIQuery = false
-                                            initView(context)
-                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
-                                        }
-                                    })
-                                    
-                                    // 复制按钮
-                                    addView(Button(context).apply {
-                                        text = "拷贝结果"
-                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
-                                        setOnClickListener {
-                                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                            val clip = ClipData.newPlainText("AI回答", answer)
-                                            clipboard.setPrimaryClip(clip)
-//                                            Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
-                                            resultPopup.dismiss()
-                                            isAddPhrases = false
-                                            isAddAIQuery = false
-                                            initView(context)
-                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
-                                        }
-                                    })
-                                })
-
-                                // 显示 PopupWindow
-                                resultPopup.showAtLocation(mEtAddPhrasesContent, Gravity.CENTER, 0, 0)
+//                                // 创建结果视图
+//                                val resultView = LinearLayout(context).apply {
+//                                    orientation = LinearLayout.VERTICAL
+//                                    setPadding(30, 20, 30, 20)
+//                                    background = GradientDrawable().apply {
+//                                        setColor(ThemeManager.activeTheme.keyBackgroundColor)
+//                                        cornerRadius = 16f
+//                                        setStroke(2, ThemeManager.activeTheme.keyTextColor) // 添加边框
+//                                        elevation = 10f // 添加阴影
+//                                    }
+//
+//
+//                                    // 标题
+//                                    addView(TextView(context).apply {
+//                                        text = "AI回答"
+//                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
+//                                        textSize = 18f
+//                                        gravity = Gravity.CENTER
+//                                        setPadding(0, 0, 0, 20)
+//                                    })
+//
+//                                    // 滚动视图和编辑框
+//                                    addView(ScrollView(context).apply {
+//                                        layoutParams = LinearLayout.LayoutParams(
+//                                            LinearLayout.LayoutParams.MATCH_PARENT,
+//                                            DevicesUtils.dip2px(200) // 限制最大高度为 200dp
+//                                        )
+//                                        addView(TextView(context).apply {
+//                                            text = answer
+//                                            setTextColor(ThemeManager.activeTheme.keyTextColor)
+//                                            gravity = Gravity.TOP or Gravity.START
+//                                            textSize = 14f
+//                                            background = null
+//                                            setPadding(20, 20, 20, 20)
+//                                            maxLines = 500 // 设置最大行数，避免内存占用过大
+//                                        })
+//                                    })
+//                                }
+//
+//                                // 创建 PopupWindow 实例
+//                                val resultPopup = PopupWindow(
+//                                    resultView,
+//                                    WindowManager.LayoutParams.WRAP_CONTENT,
+//                                    WindowManager.LayoutParams.WRAP_CONTENT
+//                                ).apply {
+//                                    isOutsideTouchable = true
+//                                    isFocusable = true
+//                                    setBackgroundDrawable(null)
+//                                }
+//
+//                                // 添加按钮容器
+//                                resultView.addView(LinearLayout(context).apply {
+//                                    orientation = LinearLayout.HORIZONTAL
+//                                    gravity = Gravity.END
+//                                    setPadding(0, 20, 0, 0)
+//
+//                                    // 取消按钮
+//                                    addView(Button(context).apply {
+//                                        text = "取消"
+//                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
+//                                        setOnClickListener {
+//                                            resultPopup.dismiss()
+//                                            isAddPhrases = false
+//                                            isAddAIQuery = false
+//                                            initView(context)
+//                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
+//                                        }
+//                                    })
+//
+//                                    // 复制按钮
+//                                    addView(Button(context).apply {
+//                                        text = "拷贝结果"
+//                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
+//                                        setOnClickListener {
+//                                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+//                                            val clip = ClipData.newPlainText("AI回答", answer)
+//                                            clipboard.setPrimaryClip(clip)
+////                                            Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+//                                            resultPopup.dismiss()
+//                                            isAddPhrases = false
+//                                            isAddAIQuery = false
+//                                            initView(context)
+//                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
+//                                        }
+//                                    })
+//                                })
+//
+//                                // 显示 PopupWindow
+//                                resultPopup.showAtLocation(mEtAddPhrasesContent, Gravity.CENTER, 0, 0)
                             } else {
                                 Toast.makeText(context, "响应格式错误", Toast.LENGTH_SHORT).show()
                             }
