@@ -718,6 +718,8 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                 background = GradientDrawable().apply {
                     setColor(ThemeManager.activeTheme.keyBackgroundColor)
                     cornerRadius = 16f
+                    setStroke(2, ThemeManager.activeTheme.keyTextColor) // 添加边框
+                    elevation = 10f // 添加阴影
                 }
                 
                 addView(TextView(context).apply {
@@ -742,6 +744,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
             ).apply {
                 isOutsideTouchable = false
                 isFocusable = false
+                elevation = 10f // 添加阴影
                 setBackgroundDrawable(null)
             }
 
@@ -791,7 +794,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                             val jsonResponse = JSONObject(responseBody)
                             if (jsonResponse.has("text")) {
                                 val answer = jsonResponse.getString("text")
-                                
+
                                 // 创建结果视图
                                 val resultView = LinearLayout(context).apply {
                                     orientation = LinearLayout.VERTICAL
@@ -800,7 +803,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                                         setColor(ThemeManager.activeTheme.keyBackgroundColor)
                                         cornerRadius = 16f
                                     }
-                                    
+
                                     // 标题
                                     addView(TextView(context).apply {
                                         text = "AI回答"
@@ -812,12 +815,11 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                                     
                                     // 滚动视图和编辑框
                                     addView(ScrollView(context).apply {
-                                        addView(EditText(context).apply {
-                                            setText(answer)
+                                        addView(TextView(context).apply {
+                                            text = answer
                                             setTextColor(ThemeManager.activeTheme.keyTextColor)
                                             gravity = Gravity.TOP or Gravity.START
-                                            minLines = 3
-                                            maxLines = 8
+                                            textSize = 14f
                                             background = null
                                             setPadding(20, 20, 20, 20)
                                         })
@@ -865,7 +867,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                             val clip = ClipData.newPlainText("AI回答", answer)
                                             clipboard.setPrimaryClip(clip)
-                                            Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+//                                            Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
                                             resultPopup.dismiss()
                                             isAddPhrases = false
                                             isAddAIQuery = false
