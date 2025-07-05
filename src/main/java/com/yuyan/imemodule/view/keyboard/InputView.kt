@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -69,6 +70,27 @@ import splitties.bitflags.hasFlag
 import splitties.views.bottomPadding
 import splitties.views.rightPadding
 import kotlin.math.absoluteValue
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.view.Gravity
+import android.view.WindowManager
+import android.widget.EditText
+import android.widget.ScrollView
+import android.widget.Toast
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import org.json.JSONObject
+import java.io.IOException
+import android.os.Handler
+import android.os.Looper
+import android.app.Dialog
+import android.widget.PopupWindow
 
 /**
  * 输入法主界面。
@@ -684,18 +706,188 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
         }
     }
 
-    private fun addAIQueryHandle(){
+    private fun addAIQueryHandle() {
         val content = mEtAddPhrasesContent?.text.toString()
-        println("do ai query $content")
+        val mainHandler = Handler(Looper.getMainLooper())
 
-        if(content.isNotBlank()) {
-            isAddPhrases = false
-            isAddAIQuery = false
-            initView(context)
-            onSettingsMenuClick(SkbMenuMode.ClipBoard)
+        if (content.isNotBlank()) {
+            // 创建加载中的 PopupWindow
+            val loadingView = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(50, 30, 50, 30)
+                background = GradientDrawable().apply {
+                    setColor(ThemeManager.activeTheme.keyBackgroundColor)
+                    cornerRadius = 16f
+                }
+                
+                addView(TextView(context).apply {
+                    text = "请稍等"
+                    setTextColor(ThemeManager.activeTheme.keyTextColor)
+                    textSize = 18f
+                    gravity = Gravity.CENTER
+                })
+                addView(TextView(context).apply {
+                    text = "正在思考中..."
+                    setTextColor(ThemeManager.activeTheme.keyTextColor)
+                    textSize = 14f
+                    gravity = Gravity.CENTER
+                    setPadding(0, 20, 0, 0)
+                })
+            }
+
+            val loadingPopup = PopupWindow(
+                loadingView,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            ).apply {
+                isOutsideTouchable = false
+                isFocusable = false
+                setBackgroundDrawable(null)
+            }
+
+            // 显示在输入框上方
+            loadingPopup.showAtLocation(mEtAddPhrasesContent, Gravity.CENTER, 0, 0)
+
+            // 检查用户登录状态
+            val user = UserManager.getCurrentUser() ?: run {
+                loadingPopup.dismiss()
+                Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // 准备请求体
+            val jsonBody = JSONObject().apply {
+                put("question", content)
+            }
+
+            // 创建 HTTP 客户端
+            val client = OkHttpClient.Builder()
+                .connectTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(300, java.util.concurrent.TimeUnit.SECONDS)
+                .build()
+
+            // 创建请求
+            val request = Request.Builder()
+                .url("https://www.qingmiao.cloud/userapi/knowledge/chatNew")
+                .addHeader("Authorization", user.token)
+                .addHeader("openid", user.username)
+                .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
+                .build()
+
+            // 发送请求
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    mainHandler.post {
+                        loadingPopup.dismiss()
+                        Toast.makeText(context, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseBody = response.body?.string()
+                    mainHandler.post {
+                        loadingPopup.dismiss()
+                        try {
+                            val jsonResponse = JSONObject(responseBody)
+                            if (jsonResponse.has("text")) {
+                                val answer = jsonResponse.getString("text")
+                                
+                                // 创建结果视图
+                                val resultView = LinearLayout(context).apply {
+                                    orientation = LinearLayout.VERTICAL
+                                    setPadding(30, 20, 30, 20)
+                                    background = GradientDrawable().apply {
+                                        setColor(ThemeManager.activeTheme.keyBackgroundColor)
+                                        cornerRadius = 16f
+                                    }
+                                    
+                                    // 标题
+                                    addView(TextView(context).apply {
+                                        text = "AI回答"
+                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
+                                        textSize = 18f
+                                        gravity = Gravity.CENTER
+                                        setPadding(0, 0, 0, 20)
+                                    })
+                                    
+                                    // 滚动视图和编辑框
+                                    addView(ScrollView(context).apply {
+                                        addView(EditText(context).apply {
+                                            setText(answer)
+                                            setTextColor(ThemeManager.activeTheme.keyTextColor)
+                                            gravity = Gravity.TOP or Gravity.START
+                                            minLines = 3
+                                            maxLines = 8
+                                            background = null
+                                            setPadding(20, 20, 20, 20)
+                                        })
+                                    }, LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                    ))
+                                }
+
+                                // 创建 PopupWindow 实例
+                                val resultPopup = PopupWindow(
+                                    resultView,
+                                    WindowManager.LayoutParams.WRAP_CONTENT,
+                                    WindowManager.LayoutParams.WRAP_CONTENT
+                                ).apply {
+                                    isOutsideTouchable = true
+                                    isFocusable = true
+                                    setBackgroundDrawable(null)
+                                }
+
+                                // 添加按钮容器
+                                resultView.addView(LinearLayout(context).apply {
+                                    orientation = LinearLayout.HORIZONTAL
+                                    gravity = Gravity.END
+                                    setPadding(0, 20, 0, 0)
+                                    
+                                    // 取消按钮
+                                    addView(Button(context).apply {
+                                        text = "取消"
+                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
+                                        setOnClickListener {
+                                            resultPopup.dismiss()
+                                            isAddPhrases = false
+                                            isAddAIQuery = false
+                                            initView(context)
+                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
+                                        }
+                                    })
+                                    
+                                    // 复制按钮
+                                    addView(Button(context).apply {
+                                        text = "拷贝结果"
+                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
+                                        setOnClickListener {
+                                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                            val clip = ClipData.newPlainText("AI回答", answer)
+                                            clipboard.setPrimaryClip(clip)
+                                            Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+                                            resultPopup.dismiss()
+                                            isAddPhrases = false
+                                            isAddAIQuery = false
+                                            initView(context)
+                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
+                                        }
+                                    })
+                                })
+
+                                // 显示 PopupWindow
+                                resultPopup.showAtLocation(mEtAddPhrasesContent, Gravity.CENTER, 0, 0)
+                            } else {
+                                Toast.makeText(context, "响应格式错误", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "解析响应失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            })
         }
     }
-
 
     /**
      * 输入法状态: 空闲，输入，联想
