@@ -91,6 +91,8 @@ import android.os.Handler
 import android.os.Looper
 import android.app.Dialog
 import android.widget.PopupWindow
+import android.widget.ProgressBar
+import android.content.res.ColorStateList
 
 /**
  * 输入法主界面。
@@ -722,12 +724,17 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                     elevation = 10f // 添加阴影
                 }
                 
-                addView(TextView(context).apply {
-                    text = "请稍等"
-                    setTextColor(ThemeManager.activeTheme.keyTextColor)
-                    textSize = 18f
-                    gravity = Gravity.CENTER
+                // 添加加载动画
+                addView(ProgressBar(context).apply {
+                    indeterminateTintList = ColorStateList.valueOf(ThemeManager.activeTheme.keyTextColor)
+                    layoutParams = LinearLayout.LayoutParams(
+                        DevicesUtils.dip2px(100),
+                        DevicesUtils.dip2px(100)
+                    ).apply {
+                        gravity = Gravity.CENTER
+                    }
                 })
+
                 addView(TextView(context).apply {
                     text = "正在思考中..."
                     setTextColor(ThemeManager.activeTheme.keyTextColor)
