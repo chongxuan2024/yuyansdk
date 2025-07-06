@@ -64,7 +64,7 @@ class FullDisplayKeyboardFragment: Fragment(){
 
         items = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            val keyModes = arrayOf(FullDisplayKeyMode.SwitchIme, FullDisplayKeyMode.SwitchLanguage, FullDisplayKeyMode.Clipboard, FullDisplayKeyMode.Phrases, FullDisplayKeyMode.None)
+            val keyModes = arrayOf(FullDisplayKeyMode.SwitchIme, FullDisplayKeyMode.SwitchLanguage, FullDisplayKeyMode.Clipboard, FullDisplayKeyMode.Phrases,FullDisplayKeyMode.Knowledge, FullDisplayKeyMode.None)
             val fullDisplayKeyLeft = AppPrefs.getInstance().internal.fullDisplayKeyModeLeft.getValue()
             addView(Item(context, R.array.FullDisplayKeyMode, FullDisplayKeyMode.decode(fullDisplayKeyLeft).ordinal).apply {
                 title.setText(R.string.keyboard_full_display_key_left)

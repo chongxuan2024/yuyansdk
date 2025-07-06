@@ -240,7 +240,7 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
         if (container is ClipBoardContainer) {
             showViewVisibility(mCandidatesMenuContainer)
             mCandidatesMenuAdapter.items = if(container.getMenuMode() == SkbMenuMode.ClipBoard) {
-                listOf(menuSkbFunsPreset[SkbMenuMode.Knowledge]!!,menuSkbFunsPreset[SkbMenuMode.AddAIQuery]!!, menuSkbFunsPreset[SkbMenuMode.ClipBoard]!!, menuSkbFunsPreset[SkbMenuMode.Phrases]!!)
+                listOf(menuSkbFunsPreset[SkbMenuMode.AddAIQuery]!!, menuSkbFunsPreset[SkbMenuMode.ClipBoard]!!, menuSkbFunsPreset[SkbMenuMode.Phrases]!!)
             } else {
                 listOf(menuSkbFunsPreset[SkbMenuMode.AddPhrases]!!, menuSkbFunsPreset[SkbMenuMode.Phrases]!!, menuSkbFunsPreset[SkbMenuMode.ClipBoard]!!)
             }

@@ -674,10 +674,15 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
         mEtAddPhrasesContent?.requestFocus()
 
         mSearchButton = mAddPhrasesLayout.findViewById(R.id.btn_ai_query_search)
+        if (ThemeManager.activeTheme.isDark) {
+            mSearchButton?.drawable?.setTint(Color.WHITE)
+        }else{
+            mSearchButton?.drawable?.setTint(Color.BLACK)
+        }
+
         if(isAddAIQuery){
             mSearchButton?.visibility = View.VISIBLE
             mSearchButton?.setOnClickListener {
-
                 addAIQueryHandle()
             }
         }else

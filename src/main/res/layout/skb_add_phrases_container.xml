@@ -51,11 +51,12 @@
 
         <ImageButton
             android:id="@+id/btn_ai_query_search"
+            android:theme="@style/Theme.AppTheme"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="center_vertical"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_baseline_search_24"
+            android:background="@null"
+            android:src="@drawable/ic_menu_query"
             android:contentDescription="搜索"/>
     </LinearLayout>
 

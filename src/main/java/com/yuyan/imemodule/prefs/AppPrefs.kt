@@ -42,7 +42,7 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         val clipboardUpdateContent = string("clipboard_update_content","")     //剪切板更新内容
         val fullDisplayKeyboardEnable = bool("full_display_keyboard_enable", true)     //全面屏键盘优化
         val fullDisplayKeyModeLeft = string("full_display_key_mode_left", FullDisplayKeyMode.SwitchIme.name)     //全面屏键盘优化:左键盘
-        val fullDisplayKeyModeRight = string("full_display_key_mode_right", FullDisplayKeyMode.Clipboard.name)     //全面屏键盘优化：右键盘
+        val fullDisplayKeyModeRight = string("full_display_key_mode_right", FullDisplayKeyMode.Knowledge.name)     //全面屏键盘优化：右键盘
         val fullDisplayCenterMode = string("full_display_center_mode", FullDisplayCenterMode.MoveCursor.name)     //全面屏键盘优化：中间区域
 
         val soundOnKeyPress = int("key_press_vibration_amplitude",0)     //按键音量

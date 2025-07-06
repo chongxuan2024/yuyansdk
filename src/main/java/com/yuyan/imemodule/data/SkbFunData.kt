@@ -4,7 +4,6 @@ import com.yuyan.imemodule.R
 import com.yuyan.imemodule.application.ImeSdkApplication
 import com.yuyan.imemodule.entity.SkbFunItem
 import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
-import com.yuyan.imemodule.ui.knowledge.KnowledgeAdapter
 
 val menuSkbFunsPreset: Map<SkbMenuMode, SkbFunItem> = hashMapOf(
     SkbMenuMode.Emojicon to SkbFunItem(ImeSdkApplication.context.getString(R.string.emoji_setting), R.drawable.ic_menu_emoji, SkbMenuMode.Emojicon),
@@ -27,6 +26,6 @@ val menuSkbFunsPreset: Map<SkbMenuMode, SkbFunItem> = hashMapOf(
     SkbMenuMode.ClearClipBoard to SkbFunItem(ImeSdkApplication.context.getString(R.string.clipboard_clear), R.drawable.ic_menu_delete, SkbMenuMode.ClearClipBoard),
     SkbMenuMode.Emoticon to SkbFunItem(ImeSdkApplication.context.getString(R.string.emoticons), R.drawable.ic_menu_emoji_emoticons, SkbMenuMode.Emoticon),
     SkbMenuMode.AddPhrases to SkbFunItem(ImeSdkApplication.context.getString(R.string.add_phrases), R.drawable.ic_menu_plus, SkbMenuMode.AddPhrases),
-    SkbMenuMode.AddAIQuery to SkbFunItem(ImeSdkApplication.context.getString(R.string.add_ai_query), R.drawable.ic_baseline_search_24, SkbMenuMode.AddAIQuery),
+    SkbMenuMode.AddAIQuery to SkbFunItem(ImeSdkApplication.context.getString(R.string.add_ai_query), R.drawable.ic_menu_query_ai, SkbMenuMode.AddAIQuery),
     SkbMenuMode.LockClipBoard to SkbFunItem(ImeSdkApplication.context.getString(R.string.lock_view), R.drawable.icon_symbol_lock, SkbMenuMode.LockClipBoard),
     )

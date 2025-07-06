@@ -9,12 +9,14 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import com.yuyan.imemodule.R
+import com.yuyan.imemodule.application.ImeSdkApplication
 import com.yuyan.imemodule.entity.keyboard.SoftKey
 import com.yuyan.imemodule.manager.InputModeSwitcherManager
 import com.yuyan.imemodule.prefs.AppPrefs
 import com.yuyan.imemodule.prefs.behavior.FullDisplayCenterMode
 import com.yuyan.imemodule.prefs.behavior.FullDisplayKeyMode
 import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
+import com.yuyan.imemodule.ui.utils.AppUtil
 import com.yuyan.imemodule.ui.utils.InputMethodUtil
 import com.yuyan.imemodule.view.keyboard.InputView
 import com.yuyan.imemodule.view.keyboard.KeyboardManager
@@ -74,6 +76,7 @@ class FullDisplayKeyboardBar(context: Context?, inputView: InputView) : LinearLa
             FullDisplayKeyMode.SwitchIme -> R.drawable.ic_menu_language
             FullDisplayKeyMode.SwitchLanguage -> R.drawable.ic_menu_keyboard_switcher
            FullDisplayKeyMode.Clipboard -> R.drawable.ic_menu_clipboard_ai
+           FullDisplayKeyMode.Knowledge -> R.drawable.ic_menu_knowledge
            FullDisplayKeyMode.Phrases -> R.drawable.ic_menu_phrases
            else -> 0
        }
@@ -81,6 +84,7 @@ class FullDisplayKeyboardBar(context: Context?, inputView: InputView) : LinearLa
     private fun onClick(keyMode:FullDisplayKeyMode){
         when(keyMode){
             FullDisplayKeyMode.SwitchIme -> InputMethodUtil.showPicker()
+            FullDisplayKeyMode.Knowledge -> AppUtil.lauchknowledge(ImeSdkApplication.context)
             FullDisplayKeyMode.SwitchLanguage -> InputModeSwitcherManager.switchModeForUserKey(InputModeSwitcherManager.USER_DEF_KEYCODE_LANG_2)
             FullDisplayKeyMode.Clipboard, FullDisplayKeyMode.Phrases -> {
                 if(KeyboardManager.instance.currentContainer is ClipBoardContainer){

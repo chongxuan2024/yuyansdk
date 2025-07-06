@@ -7,6 +7,7 @@ enum class FullDisplayKeyMode {
     SwitchLanguage,
     Clipboard,
     Phrases,
+    Knowledge,
     None;
 
     companion object : ManagedPreference.StringLikeCodec<FullDisplayKeyMode> {

@@ -42,6 +42,7 @@
         <item>"切换语言"</item>
         <item>"剪贴板"</item>
         <item>"常用语"</item>
+        <item>"知识库"</item>
         <item>"无功能"</item>
     </string-array>
     <string-array name="FullDisplayCenterKeyMode">
