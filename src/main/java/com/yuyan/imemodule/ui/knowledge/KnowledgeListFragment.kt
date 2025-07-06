@@ -1,10 +1,12 @@
 package com.yuyan.imemodule.ui.knowledge
 
 import android.os.Bundle
+import android.text.InputFilter
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -81,7 +83,6 @@ class KnowledgeListFragment : Fragment() {
             isAdmin = isAdmin,
             onItemClick = { knowledgeBase ->
                 Log.d(TAG, "点击知识库: ${knowledgeBase.name}")
-                // 处理知识库点击事件，打开知识库详情页面
                 startActivity(
                     KnowledgeDetailActivity.createIntent(
                         requireContext(),
@@ -93,13 +94,15 @@ class KnowledgeListFragment : Fragment() {
             },
             onMemberClick = { knowledgeBase ->
                 Log.d(TAG, "点击成员管理: ${knowledgeBase.name}")
-                // 处理成员管理点击事件
                 if (isAdmin) {
                     showMemberManagementDialog(knowledgeBase)
                 }
             },
             onDeleteClick = { knowledgeBase ->
                 showDeleteConfirmDialog(knowledgeBase)
+            },
+            onRenameClick = { knowledgeBase ->
+                showRenameDialog(knowledgeBase)
             }
         )
         binding.rvKnowledgeList.apply {
@@ -257,6 +260,76 @@ class KnowledgeListFragment : Fragment() {
                     } else {
                         Toast.makeText(context, 
                             "删除失败: ${response.code}", 
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun showRenameDialog(knowledgeBase: KnowledgeBase) {
+        val editText = EditText(requireContext()).apply {
+            setText(knowledgeBase.name)
+            filters = arrayOf(InputFilter.LengthFilter(50))
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("修改知识库名称")
+            .setView(editText)
+            .setPositiveButton("确定") { _, _ ->
+                val newName = editText.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    renameKnowledgeBase(knowledgeBase.id, newName)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun renameKnowledgeBase(knowledgeId: String, newName: String) {
+        val user = UserManager.getCurrentUser() ?: return
+
+        val jsonBody = JSONObject().apply {
+            put("knowledgeId", knowledgeId)
+            put("name", newName)
+        }
+
+        val request = Request.Builder()
+            .url("https://www.qingmiao.cloud/userapi/knowledge/rename")
+            .addHeader("Authorization", user.token)
+            .addHeader("openid", user.username)
+            .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                activity?.runOnUiThread {
+                    Toast.makeText(context, "修改失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                activity?.runOnUiThread {
+                    if (response.isSuccessful && responseBody != null) {
+                        try {
+                            val jsonResponse = JSONObject(responseBody)
+                            if (jsonResponse.getBoolean("success")) {
+                                Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show()
+                                loadKnowledgeBases() // 重新加载列表
+                            } else {
+                                Toast.makeText(context, 
+                                    jsonResponse.getString("message"), 
+                                    Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, 
+                                "修改失败: ${e.message}", 
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(context, 
+                            "修改失败: ${response.code}", 
                             Toast.LENGTH_SHORT).show()
                     }
                 }

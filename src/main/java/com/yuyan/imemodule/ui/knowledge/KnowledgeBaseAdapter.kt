@@ -22,17 +22,15 @@ class KnowledgeBaseAdapter(
     private val isAdmin: Boolean,
     private val onItemClick: (KnowledgeBase) -> Unit,
     private val onMemberClick: (KnowledgeBase) -> Unit,
-    private val onDeleteClick: (KnowledgeBase) -> Unit
-) : ListAdapter<KnowledgeBase, KnowledgeBaseAdapter.ViewHolder>(DiffCallback()) {
+    private val onDeleteClick: (KnowledgeBase) -> Unit,
+    private val onRenameClick: (KnowledgeBase) -> Unit
+) : ListAdapter<KnowledgeBase, KnowledgeBaseAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            ItemKnowledgeBaseBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
+        val binding = ItemKnowledgeBaseBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
         )
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -53,7 +51,7 @@ class KnowledgeBaseAdapter(
             binding.tvName.text = item.name
             
             binding.chipPaymentType.text = when (item.paymentType) {
-                PaymentType.USER_PAID -> "使用者付费"
+                PaymentType.USER_PAID -> "用户付费"
                 PaymentType.ENTERPRISE_PAID -> "企业付费"
             }
 
@@ -65,17 +63,10 @@ class KnowledgeBaseAdapter(
             }
             val creator = item.creatorUser
             if (creator != "null") {
-                binding.tvCreator.text = creator
+                binding.tvCreator.text = "创建者：$creator"
             }
 
-
-            val timestamp = item.createdAt
-            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            val date = sdf.format(Date(timestamp))
-            binding.tvCreateTime.text = buildString {
-                append(date)
-            }
-
+            binding.tvCreateTime.text = "创建时间：${formatDate(item.createdAt)}"
 
             binding.chipGroupMembers.removeAllViews()
             if (isAdmin) {
@@ -93,6 +84,11 @@ class KnowledgeBaseAdapter(
                         binding.chipGroupMembers.addView(this)
                     }
                 }
+                binding.btnDelete.visibility = View.VISIBLE
+                binding.btnRename.visibility = View.VISIBLE
+                binding.chipPaymentType.visibility = View.GONE;
+                binding.btnDelete.setOnClickListener { onDeleteClick(item) }
+                binding.btnRename.setOnClickListener { onRenameClick(item) }
             } else {
                 // 普通用户只能看到自己的角色
                 val currentUser = UserManager.getCurrentUser()
@@ -106,23 +102,27 @@ class KnowledgeBaseAdapter(
                         binding.chipGroupMembers.addView(this)
                     }
                 }
+                binding.btnDelete.visibility = View.GONE
+                binding.btnRename.visibility = View.GONE
+                binding.chipPaymentType.visibility = View.VISIBLE   ;
             }
-            
-            // 显示或隐藏删除按钮
-            binding.btnDelete.visibility = if (isAdmin) View.VISIBLE else View.GONE
-            binding.btnDelete.setOnClickListener {
-                onDeleteClick(item)
-            }
+        }
+
+        private fun formatDate(timestamp: Long): String {
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            return sdf.format(Date(timestamp))
         }
     }
 
-    private class DiffCallback : DiffUtil.ItemCallback<KnowledgeBase>() {
-        override fun areItemsTheSame(oldItem: KnowledgeBase, newItem: KnowledgeBase): Boolean {
-            return oldItem.id == newItem.id
-        }
+    companion object {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<KnowledgeBase>() {
+            override fun areItemsTheSame(oldItem: KnowledgeBase, newItem: KnowledgeBase): Boolean {
+                return oldItem.id == newItem.id
+            }
 
-        override fun areContentsTheSame(oldItem: KnowledgeBase, newItem: KnowledgeBase): Boolean {
-            return oldItem == newItem
+            override fun areContentsTheSame(oldItem: KnowledgeBase, newItem: KnowledgeBase): Boolean {
+                return oldItem == newItem
+            }
         }
     }
 }
