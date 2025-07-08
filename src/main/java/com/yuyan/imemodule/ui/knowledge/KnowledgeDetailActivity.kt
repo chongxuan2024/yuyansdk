@@ -1,11 +1,20 @@
 package com.yuyan.imemodule.ui.knowledge
 
+import android.Manifest
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.OpenableColumns
 import android.text.InputType
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -13,10 +22,13 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yuyan.imemodule.R
 import com.yuyan.imemodule.data.model.Role
 import com.yuyan.imemodule.databinding.ActivityKnowledgeDetailBinding
+import com.yuyan.imemodule.utils.LogUtils
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -29,6 +41,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.view.animation.AnimationUtils
 import android.view.animation.Animation
+import androidx.preference.PreferenceManager
 
 class KnowledgeDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityKnowledgeDetailBinding
@@ -41,7 +54,10 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     private lateinit var knowledgeName: String
     private var isAdmin: Boolean = false
     private var documentCount = 0
-
+    
+    // 已下载的文件ID集合
+    private val downloadedFiles = mutableSetOf<String>()
+    
     companion object {
         private const val EXTRA_KNOWLEDGE_ID = "knowledge_id"
         private const val EXTRA_KNOWLEDGE_NAME = "knowledge_name"
@@ -51,6 +67,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         const val EXTRA_SHARED_TEXT = "extra_shared_text"
         private const val EXTRA_KNOWLEDGE_BASE_ID = "extra_knowledge_base_id"
         private const val MENU_MEMBER = Menu.FIRST + 1
+        private const val REQUEST_WRITE_STORAGE = 112
+        private const val PREF_DOWNLOADED_FILES = "downloaded_files"
 
         fun createIntent(context: Context, knowledgeId: String, knowledgeName: String, isAdmin: Boolean): Intent {
             return Intent(context, KnowledgeDetailActivity::class.java).apply {
@@ -69,6 +87,9 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         knowledgeId = intent.getStringExtra(EXTRA_KNOWLEDGE_ID) ?: return finish()
         knowledgeName = intent.getStringExtra(EXTRA_KNOWLEDGE_NAME) ?: return finish()
         isAdmin = intent.getBooleanExtra(EXTRA_IS_ADMIN, false)
+        
+        // 加载已下载文件列表
+        loadDownloadedFiles()
 
         setupToolbar()
         setupRecyclerView()
@@ -78,13 +99,19 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
         // 处理分享的内容
         handleSharedContent()
+        
+        // 检查存储权限
+        checkStoragePermission()
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = knowledgeName
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
     }
 
     private fun setupFab() {
@@ -126,6 +153,20 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         adapter.setOnDeleteClickListener { document ->
             showDeleteConfirmDialog(document)
         }
+        
+        // 设置下载点击事件
+        adapter.setOnDownloadClickListener { document, viewHolder ->
+            if (document.isDownloading) {
+                // 如果正在下载，取消下载
+                cancelDownload(document.fileId)
+            } else if (document.isDownloaded) {
+                // 如果已下载，打开文件
+                openDownloadedFile(document.fileId, document.description)
+            } else {
+                // 否则开始下载
+                downloadFile(document, viewHolder)
+            }
+        }
 
         // 设置下拉刷新
         binding.swipeRefresh.setOnRefreshListener {
@@ -166,18 +207,20 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
                                 for (i in 0 until dataArray.length()) {
                                     val item = dataArray.getJSONObject(i)
+                                    val fileId = item.getString("fileId")
                                     documents.add(
                                         Document(
                                             id = item.getLong("id"),
                                             uid = item.getLong("uid"),
                                             createTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                                                 .parse(item.getString("createTime")) ?: Date(),
-                                            fileId = item.getString("fileId"),
+                                            fileId = fileId,
                                             fileParseStatus = item.getString("fileParseStatus"),
                                             jobId = item.getString("jobId"),
                                             jobStatus = item.getString("jobStatus"),
                                             status = item.getString("status"),
-                                            description = item.optString("description", "")
+                                            description = item.optString("description", ""),
+                                            isDownloaded = isFileDownloaded(fileId)
                                         )
                                     )
                                 }
@@ -566,6 +609,311 @@ class KnowledgeDetailActivity : AppCompatActivity() {
         // 处理分享的文本
         intent.getStringExtra(EXTRA_SHARED_TEXT)?.let { text ->
             uploadText(text)
+        }
+    }
+    
+    // 下载文件
+    private fun downloadFile(document: Document, viewHolder: DocumentAdapter.ViewHolder) {
+        val user = UserManager.getCurrentUser() ?: return
+        
+        // 检查存储权限
+        if (!hasStoragePermission()) {
+            requestStoragePermission()
+            return
+        }
+        
+        // 获取文件名
+        var fileName = document.description
+        if (fileName.startsWith("文件：")) {
+            fileName = fileName.substring(3)
+            if (fileName.contains("...")) {
+                fileName = fileName.substring(0, fileName.indexOf("..."))
+            }
+        } else {
+            fileName = "${document.fileId}.txt"
+        }
+        
+        // 构建下载URL
+        val fileId = document.fileId
+        val url = "https://www.qingmiao.cloud/userapi/knowledge/downloadFile/$fileId"
+        
+        // 创建进度对话框
+        val progressDialog = AlertDialog.Builder(this)
+            .setTitle("正在下载")
+            .setMessage("正在下载文件: $fileName")
+            .setCancelable(false)
+            .setView(layoutInflater.inflate(R.layout.dialog_progress, null))
+            .setNegativeButton("取消") { dialog, _ ->
+                // 取消下载
+                dialog.dismiss()
+            }
+            .create()
+        
+        progressDialog.show()
+        
+        // 在后台线程中下载文件
+        Thread {
+            try {
+                // 构建请求
+                val request = Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", user.token)
+                    .addHeader("openid", user.username)
+                    .build()
+                
+                // 创建下载目录
+                val downloadDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "知识库")
+                if (!downloadDir.exists()) {
+                    downloadDir.mkdirs()
+                }
+                
+                // 创建目标文件
+                val downloadFile = File(downloadDir, fileName)
+                
+                // 执行请求
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw IOException("下载失败: ${response.code}")
+                    }
+                    
+                    // 获取文件总大小
+                    val contentLength = response.body?.contentLength() ?: -1L
+                    
+                    // 打开输出流
+                    val outputStream = FileOutputStream(downloadFile)
+                    
+                    // 获取输入流
+                    val inputStream = response.body?.byteStream() ?: throw IOException("无法获取响应内容")
+                    
+                    // 缓冲区
+                    val buffer = ByteArray(8192)
+                    var bytesRead: Int
+                    var totalBytesRead: Long = 0
+                    
+                    // 读取数据并更新进度
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                        totalBytesRead += bytesRead
+                        
+                        // 计算进度
+                        val progress = if (contentLength > 0) {
+                            (totalBytesRead * 100 / contentLength).toInt()
+                        } else {
+                            -1
+                        }
+                        
+                        // 更新UI
+                        runOnUiThread {
+                            // 更新进度对话框
+                            val progressBar = progressDialog.findViewById<android.widget.ProgressBar>(R.id.progressBar)
+                            val tvProgress = progressDialog.findViewById<android.widget.TextView>(R.id.tvProgress)
+                            
+                            if (progressBar != null && tvProgress != null) {
+                                if (progress >= 0) {
+                                    progressBar.progress = progress
+                                    tvProgress.text = "$progress%"
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 关闭流
+                    outputStream.flush()
+                    outputStream.close()
+                    inputStream.close()
+                    
+                    // 下载完成，更新UI
+                    runOnUiThread {
+                        progressDialog.dismiss()
+                        
+                        // 保存下载记录
+                        saveDownloadedFileId(fileId)
+                        adapter.setDownloaded(fileId, true)
+                        
+                        // 显示成功消息
+                        Toast.makeText(this, "文件下载成功", Toast.LENGTH_SHORT).show()
+                        
+                        // 打开文件
+                        openFile(downloadFile)
+                    }
+                }
+            } catch (e: Exception) {
+                // 下载失败，更新UI
+                LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "下载文件失败", e)
+                runOnUiThread {
+                    progressDialog.dismiss()
+                    Toast.makeText(this, "下载失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+    
+    // 取消下载
+    private fun cancelDownload(fileId: String) {
+        // 由于我们使用同步下载，取消下载的功能在进度对话框的取消按钮中实现
+        // 这里只需要更新UI状态
+        adapter.setDownloaded(fileId, false)
+        Toast.makeText(this, "已取消下载", Toast.LENGTH_SHORT).show()
+    }
+    
+    // 打开已下载的文件
+    private fun openDownloadedFile(fileId: String, description: String) {
+        try {
+            // 获取文件名
+            var fileName = description
+            if (fileName.startsWith("文件：")) {
+                fileName = fileName.substring(3)
+                if (fileName.contains("...")) {
+                    fileName = fileName.substring(0, fileName.indexOf("..."))
+                }
+            } else {
+                fileName = "$fileId.txt"
+            }
+            
+            // 构建文件路径
+            val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "知识库/$fileName")
+            
+            if (!file.exists()) {
+                Toast.makeText(this, "文件不存在，请重新下载", Toast.LENGTH_SHORT).show()
+                removeDownloadedFileId(fileId)
+                adapter.setDownloaded(fileId, false)
+                return
+            }
+            
+            // 创建打开文件的Intent
+            val intent = Intent(Intent.ACTION_VIEW)
+            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    applicationContext.packageName + ".provider",
+                    file
+                )
+            } else {
+                Uri.fromFile(file)
+            }
+            
+            // 设置MIME类型
+            val mimeType = getMimeType(fileName)
+            intent.setDataAndType(uri, mimeType)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            
+            // 启动活动
+            startActivity(Intent.createChooser(intent, "打开文件"))
+            
+        } catch (e: Exception) {
+            LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "打开文件失败", e)
+            Toast.makeText(this, "打开文件失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    // 打开文件
+    private fun openFile(file: File) {
+        try {
+            // 创建打开文件的Intent
+            val intent = Intent(Intent.ACTION_VIEW)
+            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    applicationContext.packageName + ".provider",
+                    file
+                )
+            } else {
+                Uri.fromFile(file)
+            }
+            
+            // 设置MIME类型
+            val mimeType = getMimeType(file.name)
+            intent.setDataAndType(uri, mimeType)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            
+            // 启动活动
+            startActivity(Intent.createChooser(intent, "打开文件"))
+        } catch (e: Exception) {
+            LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "打开文件失败", e)
+            Toast.makeText(this, "打开文件失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    // 获取MIME类型
+    private fun getMimeType(fileName: String): String {
+        return when {
+            fileName.endsWith(".pdf", true) -> "application/pdf"
+            fileName.endsWith(".doc", true) || fileName.endsWith(".docx", true) -> "application/msword"
+            fileName.endsWith(".xls", true) || fileName.endsWith(".xlsx", true) -> "application/vnd.ms-excel"
+            fileName.endsWith(".ppt", true) || fileName.endsWith(".pptx", true) -> "application/vnd.ms-powerpoint"
+            fileName.endsWith(".txt", true) -> "text/plain"
+            fileName.endsWith(".jpg", true) || fileName.endsWith(".jpeg", true) -> "image/jpeg"
+            fileName.endsWith(".png", true) -> "image/png"
+            else -> "*/*"
+        }
+    }
+    
+    // 保存已下载文件ID
+    private fun saveDownloadedFileId(fileId: String) {
+        downloadedFiles.add(fileId)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = prefs.edit()
+        editor.putStringSet(PREF_DOWNLOADED_FILES, downloadedFiles)
+        editor.apply()
+    }
+    
+    // 移除已下载文件ID
+    private fun removeDownloadedFileId(fileId: String) {
+        downloadedFiles.remove(fileId)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = prefs.edit()
+        editor.putStringSet(PREF_DOWNLOADED_FILES, downloadedFiles)
+        editor.apply()
+    }
+    
+    // 加载已下载文件列表
+    private fun loadDownloadedFiles() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val savedFiles = prefs.getStringSet(PREF_DOWNLOADED_FILES, emptySet()) ?: emptySet()
+        downloadedFiles.addAll(savedFiles)
+    }
+    
+    // 检查文件是否已下载
+    private fun isFileDownloaded(fileId: String): Boolean {
+        return downloadedFiles.contains(fileId)
+    }
+    
+    // 检查存储权限
+    private fun checkStoragePermission() {
+        if (!hasStoragePermission()) {
+            requestStoragePermission()
+        }
+    }
+    
+    // 是否有存储权限
+    private fun hasStoragePermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            true // Android 10及以上使用分区存储，不需要特殊权限
+        } else {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+    
+    // 请求存储权限
+    private fun requestStoragePermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                REQUEST_WRITE_STORAGE
+            )
+        }
+    }
+    
+    // 权限请求结果处理
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_WRITE_STORAGE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "存储权限已授予", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "需要存储权限才能下载文件", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 } 

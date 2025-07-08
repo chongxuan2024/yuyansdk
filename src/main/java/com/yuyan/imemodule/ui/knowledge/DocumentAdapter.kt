@@ -20,7 +20,10 @@ data class Document(
     val jobId: String,
     val jobStatus: String,
     val status: String,
-    val description: String
+    val description: String,
+    var isDownloaded: Boolean = false,
+    var isDownloading: Boolean = false,
+    var downloadProgress: Int = 0
 ) {
     companion object {
         const val FILE_PARSE_STATUS_PARSING = "PARSING"
@@ -39,16 +42,42 @@ data class Document(
 class DocumentAdapter(private val isAdmin: Boolean = false) : ListAdapter<Document, DocumentAdapter.ViewHolder>(DocumentDiffCallback()) {
 
     private var onDeleteClickListener: ((Document) -> Unit)? = null
+    private var onDownloadClickListener: ((Document, ViewHolder) -> Unit)? = null
 
     fun setOnDeleteClickListener(listener: (Document) -> Unit) {
         onDeleteClickListener = listener
+    }
+    
+    fun setOnDownloadClickListener(listener: (Document, ViewHolder) -> Unit) {
+        onDownloadClickListener = listener
+    }
+    
+    fun updateDownloadProgress(fileId: String, progress: Int) {
+        val position = currentList.indexOfFirst { it.fileId == fileId }
+        if (position != -1) {
+            val document = getItem(position)
+            document.downloadProgress = progress
+            document.isDownloading = progress < 100
+            document.isDownloaded = progress == 100
+            notifyItemChanged(position)
+        }
+    }
+    
+    fun setDownloaded(fileId: String, isDownloaded: Boolean) {
+        val position = currentList.indexOfFirst { it.fileId == fileId }
+        if (position != -1) {
+            val document = getItem(position)
+            document.isDownloaded = isDownloaded
+            document.isDownloading = false
+            notifyItemChanged(position)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemDocumentBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return ViewHolder(binding, onDeleteClickListener)
+        return ViewHolder(binding, onDeleteClickListener, onDownloadClickListener)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -57,13 +86,13 @@ class DocumentAdapter(private val isAdmin: Boolean = false) : ListAdapter<Docume
 
     class ViewHolder(
         private val binding: ItemDocumentBinding,
-        private val onDeleteClickListener: ((Document) -> Unit)?
+        private val onDeleteClickListener: ((Document) -> Unit)?,
+        private val onDownloadClickListener: ((Document, ViewHolder) -> Unit)?
     ) : RecyclerView.ViewHolder(binding.root) {
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
         fun bind(document: Document, isAdmin: Boolean) {
             binding.apply {
-//                tvFileId.text = document.fileId
                 tvDescription.text = document.description
                 
                 // 设置删除按钮的可见性和点击事件
@@ -71,6 +100,14 @@ class DocumentAdapter(private val isAdmin: Boolean = false) : ListAdapter<Docume
                 btnDelete.setOnClickListener {
                     onDeleteClickListener?.invoke(document)
                 }
+                
+                // 设置下载按钮的点击事件
+                btnDownload.setOnClickListener {
+                    onDownloadClickListener?.invoke(document, this@ViewHolder)
+                }
+                
+                // 更新下载状态UI
+                updateDownloadState(document)
                 
                 // 设置文档状态
                 chipStatus.apply {
@@ -103,33 +140,37 @@ class DocumentAdapter(private val isAdmin: Boolean = false) : ListAdapter<Docume
                     )
                 }
 
-                // 设置任务状态
-//                tvJobStatus.apply {
-//                    text = "任务状态：${
-//                        when (document.jobStatus) {
-//                            Document.JOB_STATUS_COMPLETED -> "已完成"
-//                            Document.JOB_STATUS_FAILED -> "失败"
-//                            Document.JOB_STATUS_RUNNING -> "运行中"
-//                            Document.JOB_STATUS_PENDING -> "等待中"
-//                            else -> document.jobStatus
-//                        }
-//                    }"
-//                    setTextColor(
-//                        context.getColor(
-//                            when (document.jobStatus) {
-//                                Document.JOB_STATUS_COMPLETED -> R.color.status_ok
-//                                Document.JOB_STATUS_FAILED -> R.color.status_error
-//                                Document.JOB_STATUS_RUNNING -> R.color.status_running
-//                                Document.JOB_STATUS_PENDING -> R.color.status_pending
-//                                else -> R.color.status_error
-//                            }
-//                        )
-//                    )
-//                }
-
                 // 设置创建时间
                 tvCreateTime.text = "创建时间：${dateFormat.format(document.createTime)}"
             }
+        }
+        
+        fun updateDownloadState(document: Document) {
+            binding.apply {
+                if (document.isDownloading) {
+                    progressDownload.visibility = View.VISIBLE
+                    progressDownload.progress = document.downloadProgress
+                    btnDownload.setImageResource(android.R.drawable.ic_media_pause)
+                } else {
+                    progressDownload.visibility = if (document.isDownloaded) View.GONE else View.GONE
+                    btnDownload.setImageResource(
+                        if (document.isDownloaded) android.R.drawable.ic_menu_view 
+                        else android.R.drawable.ic_menu_save
+                    )
+                }
+            }
+        }
+        
+        fun updateProgress(progress: Int) {
+            binding.progressDownload.progress = progress
+        }
+        
+        fun showProgress() {
+            binding.progressDownload.visibility = View.VISIBLE
+        }
+        
+        fun hideProgress() {
+            binding.progressDownload.visibility = View.GONE
         }
     }
 }
