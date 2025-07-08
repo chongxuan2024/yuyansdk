@@ -51,7 +51,6 @@ class KeyboardManager {
         if (container == null) {
             container = when (keyboardName) {
                 KeyboardType.CANDIDATES ->  CandidatesContainer(ImeSdkApplication.context, mInputView)
-                KeyboardType.HANDWRITING -> HandwritingContainer(ImeSdkApplication.context, mInputView)
                 KeyboardType.NUMBER -> NumberContainer(ImeSdkApplication.context, mInputView)
                 KeyboardType.QWERTY -> QwertyContainer(ImeSdkApplication.context, mInputView, InputModeSwitcherManager.MASK_SKB_LAYOUT_QWERTY_PINYIN)
                 KeyboardType.SETTINGS -> SettingsContainer(ImeSdkApplication.context, mInputView)
