@@ -124,7 +124,7 @@ class LogUtils {
             
             // 当前日期作为文件名
             val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-            val logFile = File(logDir, "yuyan_ime_log_$currentDate.log")
+            val logFile = File(logDir, "ime_log_$currentDate.log")
             
             if (!logFile.exists()) {
                 try {
@@ -146,7 +146,7 @@ class LogUtils {
             
             // 使用时间戳创建唯一文件名
             val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-            val logFile = File(logDir, "yuyan_ime_log_$timestamp.log")
+            val logFile = File(logDir, "ime_log_$timestamp.log")
             
             try {
                 logFile.createNewFile()
