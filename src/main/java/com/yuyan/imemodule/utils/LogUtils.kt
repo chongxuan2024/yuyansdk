@@ -28,9 +28,9 @@ class LogUtils {
     }
     
     companion object {
-        private const val TAG = "YuyanIME"
+        private const val TAG = "AIIME"
         private const val MAX_LOG_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-        private const val LOG_FOLDER_NAME = "YuyanIMELogs"
+        private const val LOG_FOLDER_NAME = "AIIMELogs"
         
         private val logExecutor: ExecutorService = Executors.newSingleThreadExecutor()
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
