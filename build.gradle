@@ -10,9 +10,6 @@ static def versionNameDate() {
     return new Date().format("yyyyMMdd.HH", TimeZone.getTimeZone("GMT+8"))
 }
 
-static def getSDKGitHead() {
-    return "git --git-dir=/home/gure/devproject/Private/Yuyan/YuyanIme/yuyansdk/.git rev-parse HEAD".execute().text.trim()
-}
 
 static def getAppGitHead() {
     return "git rev-parse HEAD".execute().text.trim()
@@ -43,7 +40,6 @@ android {
         }
 
         buildConfigField "String", "versionName", "\"${versionNameDate()}\""
-        buildConfigField "String", "SdkCommitHead", "\"${getSDKGitHead()}\""
         buildConfigField "String", "AppCommitHead", "\"${getAppGitHead()}\""
         buildConfigField "String", "AppBuildTime", "\"${getAppBuildTime()}\""
     }
