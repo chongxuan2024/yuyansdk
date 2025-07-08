@@ -75,6 +75,11 @@
             android:label="@string/knowledge_member"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
         <activity
+            android:name=".ui.LogManagementActivity"
+            android:label="日志管理"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+        <activity
             android:name=".ui.share.ShareReceiverActivity"
             android:exported="true">
             <intent-filter>
