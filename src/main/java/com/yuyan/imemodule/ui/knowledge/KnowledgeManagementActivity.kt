@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -19,6 +20,8 @@ import com.yuyan.imemodule.R
 import com.yuyan.imemodule.data.model.*
 import com.yuyan.imemodule.databinding.ActivityKnowledgeManagementBinding
 import com.yuyan.imemodule.databinding.DialogAddKnowledgeBaseBinding
+import com.yuyan.imemodule.ui.LogManagementActivity
+import com.yuyan.imemodule.utils.LogUtils
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -47,6 +50,9 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         setupRecyclerView()
         setupViewPager()
         setupFab()
+        
+        // 记录日志
+        LogUtils.Companion.i(LogUtils.LogType.KNOWLEDGE_BASE, "知识库管理界面已打开")
     }
 
     private fun setupToolbar() {
@@ -55,10 +61,19 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         supportActionBar?.title = "知识库管理"
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_knowledge_management, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 finish()
+                true
+            }
+            R.id.action_log_management -> {
+                startActivity(LogManagementActivity.createIntent(this))
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -147,6 +162,9 @@ class KnowledgeManagementActivity : AppCompatActivity() {
     private fun createKnowledgeBase(name: String, paymentType: PaymentType, templateType: TemplateType) {
         val user = UserManager.getCurrentUser() ?: return
 
+        // 记录日志
+        LogUtils.Companion.i(LogUtils.LogType.KNOWLEDGE_BASE, "创建知识库: name=$name, paymentType=$paymentType, templateType=$templateType")
+
         val jsonBody = JSONObject().apply {
             put("name", name)
             put("paymentType", paymentType.name)
@@ -162,6 +180,7 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         println("createKnowledgeBase $jsonBody");
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "创建知识库失败", e)
                 runOnUiThread {
                     Toast.makeText(this@KnowledgeManagementActivity, 
                         "创建失败: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -174,15 +193,19 @@ class KnowledgeManagementActivity : AppCompatActivity() {
                     if (response.isSuccessful && responseBody != null) {
                         val jsonResponse = JSONObject(responseBody)
                         if (jsonResponse.getBoolean("success")) {
+                            LogUtils.Companion.i(LogUtils.LogType.KNOWLEDGE_BASE, "创建知识库成功: $responseBody")
                             Toast.makeText(this@KnowledgeManagementActivity,
                                 "创建成功", Toast.LENGTH_SHORT).show()
                             // 刷新列表
                             loadKnowledgeList()
                         } else {
+                            val message = jsonResponse.getString("message")
+                            LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "创建知识库失败: $message")
                             Toast.makeText(this@KnowledgeManagementActivity,
-                                jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                                message, Toast.LENGTH_SHORT).show()
                         }
                     } else {
+                        LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "创建知识库失败，状态码: ${response.code}")
                         Toast.makeText(this@KnowledgeManagementActivity,
                             "创建失败", Toast.LENGTH_SHORT).show()
                     }
@@ -216,7 +239,15 @@ class KnowledgeManagementActivity : AppCompatActivity() {
     }
 
     private fun deleteKnowledge(fileId: String) {
-        // TODO: 实现删除知识的功能
+        // 记录日志
+        LogUtils.Companion.i(LogUtils.LogType.KNOWLEDGE_BASE, "删除知识文件: fileId=$fileId")
+        
+        // 实现删除知识的功能
+        try {
+            // TODO: 实现删除知识的功能
+        } catch (e: Exception) {
+            LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "删除知识文件失败", e)
+        }
     }
 
     private fun checkFileStatus(fileId: String) {
@@ -230,6 +261,7 @@ class KnowledgeManagementActivity : AppCompatActivity() {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "获取文件状态失败: fileId=$fileId", e)
                 runOnUiThread {
                     Toast.makeText(this@KnowledgeManagementActivity, "获取状态失败", Toast.LENGTH_SHORT).show()
                 }
@@ -239,10 +271,16 @@ class KnowledgeManagementActivity : AppCompatActivity() {
                 val responseBody = response.body?.string()
                 runOnUiThread {
                     if (response.isSuccessful && responseBody != null) {
-                        val jsonResponse = JSONObject(responseBody)
-                        if (jsonResponse.getBoolean("success")) {
-                            val data = jsonResponse.getJSONObject("data")
-                            adapter.updateItemStatus(fileId, data.getString("fileParseStatus"))
+                        try {
+                            val jsonResponse = JSONObject(responseBody)
+                            if (jsonResponse.getBoolean("success")) {
+                                val data = jsonResponse.getJSONObject("data")
+                                val status = data.getString("fileParseStatus")
+                                LogUtils.Companion.i(LogUtils.LogType.KNOWLEDGE_BASE, "文件状态: fileId=$fileId, status=$status")
+                                adapter.updateItemStatus(fileId, status)
+                            }
+                        } catch (e: Exception) {
+                            LogUtils.Companion.e(LogUtils.LogType.KNOWLEDGE_BASE, "解析文件状态响应失败", e)
                         }
                     }
                 }
