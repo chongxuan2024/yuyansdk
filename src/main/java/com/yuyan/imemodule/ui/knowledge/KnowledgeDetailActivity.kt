@@ -191,6 +191,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                     binding.swipeRefresh.isRefreshing = false
                     Toast.makeText(this@KnowledgeDetailActivity,
                         "加载失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    LogUtils.e(LogUtils.LogType.KNOWLEDGE_BASE, "加载知识库文档列表失败: ${e.message}", e)
                 }
             }
 
@@ -231,17 +232,21 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                                 binding.emptyView.visibility = if (documents.isEmpty()) View.VISIBLE else View.GONE
                                 documentCount = documents.size
                                 updateTreeLevel(documentCount)
+                                LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "加载知识库文档列表成功: $knowledgeBaseId, 文档数量: ${documents.size}")
                             } else {
                                 Toast.makeText(this@KnowledgeDetailActivity,
                                     jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                                LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "加载知识库文档列表失败: ${jsonResponse.getString("message")}")
                             }
                         } catch (e: Exception) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "数据解析失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                            LogUtils.e(LogUtils.LogType.KNOWLEDGE_BASE, "解析知识库文档列表数据失败", e)
                         }
                     } else {
                         Toast.makeText(this@KnowledgeDetailActivity,
                             "加载失败: ${response.code}", Toast.LENGTH_SHORT).show()
+                        LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "加载知识库文档列表请求失败: ${response.code}")
                     }
                 }
             }
@@ -341,6 +346,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     private fun uploadText(text: String) {
         val user = UserManager.getCurrentUser() ?: return
 
+        LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "开始上传文本到知识库: $knowledgeId, 文本长度: ${text.length}字符")
+
         val jsonBody = JSONObject().apply {
             put("text", text)
         }
@@ -357,6 +364,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(this@KnowledgeDetailActivity,
                         "上传失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    LogUtils.e(LogUtils.LogType.KNOWLEDGE_BASE, "上传文本到知识库失败: ${e.message}", e)
                 }
             }
 
@@ -368,14 +376,17 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
+                            LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "上传文本到知识库成功: $knowledgeId")
                             uploadSuccess()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                            LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "上传文本到知识库失败: ${jsonResponse.getString("message")}")
                         }
                     } else {
                         Toast.makeText(this@KnowledgeDetailActivity,
                             "上传失败", Toast.LENGTH_SHORT).show()
+                        LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "上传文本到知识库请求失败: ${response.code}")
                     }
                 }
             }
@@ -384,6 +395,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
     private fun uploadUrl(url: String) {
         val user = UserManager.getCurrentUser() ?: return
+
+        LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "开始上传URL到知识库: $knowledgeId, URL: $url")
 
         val jsonBody = JSONObject().apply {
             put("url", url)
@@ -401,6 +414,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(this@KnowledgeDetailActivity,
                         "上传失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    LogUtils.e(LogUtils.LogType.KNOWLEDGE_BASE, "上传URL到知识库失败: ${e.message}", e)
                 }
             }
 
@@ -412,14 +426,17 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
+                            LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "上传URL到知识库成功: $knowledgeId, URL: $url")
                             uploadSuccess()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                            LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "上传URL到知识库失败: ${jsonResponse.getString("message")}")
                         }
                     } else {
                         Toast.makeText(this@KnowledgeDetailActivity,
                             "上传失败", Toast.LENGTH_SHORT).show()
+                        LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "上传URL到知识库请求失败: ${response.code}")
                     }
                 }
             }
@@ -431,6 +448,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
 
         // 创建临时文件
         val fileName = getFileName(uri)
+        LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "开始上传文件到知识库: $knowledgeId, 文件名: $fileName")
+        
         val tempFile = File(cacheDir, fileName)
         contentResolver.openInputStream(uri)?.use { input ->
             FileOutputStream(tempFile).use { output ->
@@ -457,6 +476,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(this@KnowledgeDetailActivity,
                         "上传失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    LogUtils.e(LogUtils.LogType.KNOWLEDGE_BASE, "上传文件到知识库失败: ${e.message}", e)
                 }
             }
 
@@ -469,14 +489,17 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "上传成功", Toast.LENGTH_SHORT).show()
+                            LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "上传文件到知识库成功: $knowledgeId, 文件名: $fileName")
                             uploadSuccess()
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                            LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "上传文件到知识库失败: ${jsonResponse.getString("message")}")
                         }
                     } else {
                         Toast.makeText(this@KnowledgeDetailActivity,
                             "上传失败", Toast.LENGTH_SHORT).show()
+                        LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "上传文件到知识库请求失败: ${response.code}")
                     }
                 }
             }
@@ -510,6 +533,8 @@ class KnowledgeDetailActivity : AppCompatActivity() {
     private fun deleteDocument(document: Document) {
         val user = UserManager.getCurrentUser() ?: return
 
+        LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "开始删除知识库文档: $knowledgeId, 文档ID: ${document.id}, 描述: ${document.description}")
+
         val jsonBody = JSONObject().apply {
             put("id", document.id)
         }
@@ -526,6 +551,7 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(this@KnowledgeDetailActivity,
                         "删除失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    LogUtils.e(LogUtils.LogType.KNOWLEDGE_BASE, "删除知识库文档失败: ${e.message}", e)
                 }
             }
 
@@ -537,16 +563,19 @@ class KnowledgeDetailActivity : AppCompatActivity() {
                         if (jsonResponse.getBoolean("success")) {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 "删除成功", Toast.LENGTH_SHORT).show()
+                            LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "删除知识库文档成功: $knowledgeId, 文档ID: ${document.id}")
                             documentCount--
                             updateTreeLevel(documentCount)
                             loadDocuments() // 重新加载文档列表
                         } else {
                             Toast.makeText(this@KnowledgeDetailActivity,
                                 jsonResponse.getString("message"), Toast.LENGTH_SHORT).show()
+                            LogUtils.w(LogUtils.LogType.KNOWLEDGE_BASE, "删除知识库文档失败: ${jsonResponse.getString("message")}")
                         }
                     } catch (e: Exception) {
                         Toast.makeText(this@KnowledgeDetailActivity,
                             "删除失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                        LogUtils.e(LogUtils.LogType.KNOWLEDGE_BASE, "解析删除知识库文档响应失败", e)
                     }
                 }
             }

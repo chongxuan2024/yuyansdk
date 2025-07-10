@@ -85,7 +85,6 @@ class ClipBoardAdapter(
     // 初始化块
     init {
         LogUtils.Companion.d(LogUtils.LogType.CLIPBOARD, "初始化剪贴板适配器: 数据项数=${datas.size}, 模式=$subMode")
-
     }
 
     private fun loadKnowledgeBases() {
@@ -152,8 +151,7 @@ class ClipBoardAdapter(
     // 创建ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SymbolHolder {
         try {
-            LogUtils.Companion.d(LogUtils.LogType.CLIPBOARD, "创建剪贴板项ViewHolder")
-            
+
             // 创建容器布局
             val mContainer = RelativeLayout(mContext)
             // 设置垂直居中
@@ -448,7 +446,7 @@ class ClipBoardAdapter(
     // 修改发送内容到输入框的方法
     private fun sendToInputBox(text: String, holder: SymbolHolder) {
         try {
-            LogUtils.Companion.d(LogUtils.LogType.CLIPBOARD, "发送内容到输入框: $text")
+            LogUtils.Companion.d(LogUtils.LogType.CLIPBOARD, "更新AI响应到剪贴板内容，长度: ${text.length}")
             
             // 直接更新文本视图的内容
             holder.textView.text = text
@@ -463,14 +461,14 @@ class ClipBoardAdapter(
                 }
             }
         } catch (e: Exception) {
-            LogUtils.Companion.e(LogUtils.LogType.CLIPBOARD, "发送内容到输入框失败", e)
+            LogUtils.Companion.e(LogUtils.LogType.CLIPBOARD, "更新AI响应到剪贴板内容", e)
         }
     }
 
     // 修改显示内容的方法
     private fun showContentDialog(content: String, holder: SymbolHolder, originalContent: String, knowledgeBaseIds: String?) {
         try {
-            LogUtils.Companion.i(LogUtils.LogType.AI_QUERY, "发起AI查询: content=$content, knowledgeBaseIds=$knowledgeBaseIds")
+            LogUtils.Companion.i(LogUtils.LogType.AI_QUERY, "剪贴板：点击AI答复: content=$content, knowledgeBaseIds=$knowledgeBaseIds")
             
             val currentButton = holder.detailButton
 
@@ -518,7 +516,7 @@ class ClipBoardAdapter(
                         if (response.isSuccessful && responseBody != null) {
                             try {
                                 val jsonResponse = JSONObject(responseBody)
-                                LogUtils.Companion.i(LogUtils.LogType.AI_REPLY, "AI回复成功: $responseBody")
+                                LogUtils.Companion.i(LogUtils.LogType.AI_REPLY, "AI回复成功:内容长度 ${responseBody.length}")
                                 
                                 currentSessionId = jsonResponse.getString("sessionId")
                                 val aiReply = jsonResponse.getString("text")
@@ -532,7 +530,7 @@ class ClipBoardAdapter(
                             }
                         } else {
                             LogUtils.Companion.e(LogUtils.LogType.AI_REPLY, "AI回复失败，状态码: ${response.code}")
-                            Toast.makeText(mContext, "服务器响应错误: ${response.code}",
+                            Toast.makeText(mContext, "服务器响应错误: ${response.code},请检查是否还有请求配额。",
                                 Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -547,7 +545,6 @@ class ClipBoardAdapter(
     // 清除会话
     private fun clearSession(holder: SymbolHolder) {
         try {
-            LogUtils.Companion.i(LogUtils.LogType.AI_QUERY, "清除会话")
             currentSessionId = null
             Toast.makeText(mContext, "已开始新会话", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {

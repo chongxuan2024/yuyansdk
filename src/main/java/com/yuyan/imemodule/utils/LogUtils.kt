@@ -4,6 +4,10 @@ import android.content.Context
 import android.os.Environment
 import android.util.Log
 import com.yuyan.imemodule.application.ImeSdkApplication
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -34,6 +38,29 @@ class LogUtils {
         
         private val logExecutor: ExecutorService = Executors.newSingleThreadExecutor()
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+        
+        // 日志开关，默认开启
+        private var isLoggingEnabled = true
+        
+        // OkHttp 客户端
+        private val client = OkHttpClient.Builder()
+            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+        
+        /**
+         * 设置日志开关
+         */
+        fun setLoggingEnabled(enabled: Boolean) {
+            isLoggingEnabled = enabled
+        }
+        
+        /**
+         * 获取日志开关状态
+         */
+        fun isLoggingEnabled(): Boolean {
+            return isLoggingEnabled
+        }
         
         /**
          * 记录调试日志
@@ -83,8 +110,11 @@ class LogUtils {
                 LogLevel.ERROR -> Log.e(TAG, logMessage)
             }
             
-            // 保存到文件
-            saveToFile(logMessage)
+            // 如果日志开关打开，保存到文件并上传到服务器
+            if (isLoggingEnabled) {
+                saveToFile(logMessage)
+                uploadLogToServer(level, type, message)
+            }
         }
         
         /**
@@ -106,6 +136,50 @@ class LogUtils {
                     }
                 } catch (e: IOException) {
                     Log.e(TAG, "保存日志到文件失败", e)
+                }
+            }
+        }
+        
+        /**
+         * 上传日志到服务器
+         */
+        private fun uploadLogToServer(level: LogLevel, type: LogType, message: String) {
+            val user = UserManager.getCurrentUser() ?: return
+            
+            logExecutor.execute {
+                try {
+                    // 构建请求体
+                    val jsonBody = JSONObject().apply {
+                        put("level", level.name)
+                        put("type", type.name)
+                        put("message", message)
+                        put("timestamp", System.currentTimeMillis())
+                        put("deviceInfo", android.os.Build.MODEL)
+                    }
+                    
+                    // 创建请求
+                    val request = Request.Builder()
+                        .url("https://www.qingmiao.cloud/userapi/knowledge/uploadLogMessage")
+                        .addHeader("Authorization", user.token)
+                        .addHeader("openid", user.username)
+                        .post(jsonBody.toString().toRequestBody("application/json".toMediaType()))
+                        .build()
+                    
+                    // 发送请求
+                    client.newCall(request).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            Log.e(TAG, "上传日志消息失败: ${e.message}")
+                        }
+                        
+                        override fun onResponse(call: Call, response: Response) {
+                            if (!response.isSuccessful) {
+                                Log.e(TAG, "上传日志消息失败，状态码: ${response.code}")
+                            }
+                            response.close()
+                        }
+                    })
+                } catch (e: Exception) {
+                    Log.e(TAG, "准备上传日志消息请求失败: ${e.message}")
                 }
             }
         }

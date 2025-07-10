@@ -93,6 +93,7 @@ import android.app.Dialog
 import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.content.res.ColorStateList
+import com.yuyan.imemodule.utils.LogUtils
 
 /**
  * 输入法主界面。
@@ -114,7 +115,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
     private var service: ImeService
     private var mImeState = ImeState.STATE_IDLE // 当前的输入法状态
     private var mChoiceNotifier = ChoiceNotifier()
-    private lateinit var mComposingView: ComposingView // 组成字符串的View，用于显示输入的拼音。
+    lateinit var mComposingView: ComposingView // 组成字符串的View，用于显示输入的拼音。
     lateinit var mSkbRoot: RelativeLayout
     lateinit var mSkbCandidatesBarView: CandidatesBar //候选词栏根View
     private lateinit var mHoderLayoutLeft: LinearLayout
@@ -679,10 +680,12 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
         }else{
             mSearchButton?.drawable?.setTint(Color.BLACK)
         }
-
+        LogUtils.i(LogUtils.LogType.AI_QUERY, "显示输入对话框，是否AI输入框：$isAddAIQuery")
         if(isAddAIQuery){
             mSearchButton?.visibility = View.VISIBLE
+            LogUtils.i(LogUtils.LogType.AI_QUERY, "显示查询按钮，并监听点击事件：$mSearchButton?.visibility")
             mSearchButton?.setOnClickListener {
+                LogUtils.i(LogUtils.LogType.AI_QUERY, "点击查询按钮")
                 addAIQueryHandle()
             }
         }else
@@ -716,8 +719,14 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
     private fun addAIQueryHandle() {
         val content = mEtAddPhrasesContent?.text.toString()
         val mainHandler = Handler(Looper.getMainLooper())
-
-        if (content.isNotBlank()) {
+        if(content.isBlank()){
+            LogUtils.i(LogUtils.LogType.AI_QUERY, "输入内容为空，取消AI查询")
+            Toast.makeText(context, "您未输入您想咨询的问题", Toast.LENGTH_SHORT).show()
+            initView(context)
+        }else{
+            // 记录AI查询开始日志
+            LogUtils.i(LogUtils.LogType.AI_QUERY, "开始AI查询: $content")
+            
             // 创建加载中的 PopupWindow
             val loadingView = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
@@ -767,6 +776,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
             val user = UserManager.getCurrentUser() ?: run {
                 loadingPopup.dismiss()
                 Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                LogUtils.w(LogUtils.LogType.AI_QUERY, "AI查询失败: 用户未登录")
                 return
             }
 
@@ -795,6 +805,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                     mainHandler.post {
                         loadingPopup.dismiss()
                         Toast.makeText(context, "请求失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                        LogUtils.e(LogUtils.LogType.AI_QUERY, "AI查询请求失败", e)
                     }
                 }
 
@@ -806,7 +817,7 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                             val jsonResponse = JSONObject(responseBody)
                             if (jsonResponse.has("text")) {
                                 val answer = jsonResponse.getString("text")
-
+                                LogUtils.i(LogUtils.LogType.AI_REPLY, "AI查询成功，回复长度: ${answer.length}字符")
 
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 val clip = ClipData.newPlainText("AI回答", answer)
@@ -816,104 +827,13 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                                 isAddAIQuery = false
                                 initView(context)
                                 onSettingsMenuClick(SkbMenuMode.ClipBoard)
-
-
-
-
-//                                // 创建结果视图
-//                                val resultView = LinearLayout(context).apply {
-//                                    orientation = LinearLayout.VERTICAL
-//                                    setPadding(30, 20, 30, 20)
-//                                    background = GradientDrawable().apply {
-//                                        setColor(ThemeManager.activeTheme.keyBackgroundColor)
-//                                        cornerRadius = 16f
-//                                        setStroke(2, ThemeManager.activeTheme.keyTextColor) // 添加边框
-//                                        elevation = 10f // 添加阴影
-//                                    }
-//
-//
-//                                    // 标题
-//                                    addView(TextView(context).apply {
-//                                        text = "AI回答"
-//                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
-//                                        textSize = 18f
-//                                        gravity = Gravity.CENTER
-//                                        setPadding(0, 0, 0, 20)
-//                                    })
-//
-//                                    // 滚动视图和编辑框
-//                                    addView(ScrollView(context).apply {
-//                                        layoutParams = LinearLayout.LayoutParams(
-//                                            LinearLayout.LayoutParams.MATCH_PARENT,
-//                                            DevicesUtils.dip2px(200) // 限制最大高度为 200dp
-//                                        )
-//                                        addView(TextView(context).apply {
-//                                            text = answer
-//                                            setTextColor(ThemeManager.activeTheme.keyTextColor)
-//                                            gravity = Gravity.TOP or Gravity.START
-//                                            textSize = 14f
-//                                            background = null
-//                                            setPadding(20, 20, 20, 20)
-//                                            maxLines = 500 // 设置最大行数，避免内存占用过大
-//                                        })
-//                                    })
-//                                }
-//
-//                                // 创建 PopupWindow 实例
-//                                val resultPopup = PopupWindow(
-//                                    resultView,
-//                                    WindowManager.LayoutParams.WRAP_CONTENT,
-//                                    WindowManager.LayoutParams.WRAP_CONTENT
-//                                ).apply {
-//                                    isOutsideTouchable = true
-//                                    isFocusable = true
-//                                    setBackgroundDrawable(null)
-//                                }
-//
-//                                // 添加按钮容器
-//                                resultView.addView(LinearLayout(context).apply {
-//                                    orientation = LinearLayout.HORIZONTAL
-//                                    gravity = Gravity.END
-//                                    setPadding(0, 20, 0, 0)
-//
-//                                    // 取消按钮
-//                                    addView(Button(context).apply {
-//                                        text = "取消"
-//                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
-//                                        setOnClickListener {
-//                                            resultPopup.dismiss()
-//                                            isAddPhrases = false
-//                                            isAddAIQuery = false
-//                                            initView(context)
-//                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
-//                                        }
-//                                    })
-//
-//                                    // 复制按钮
-//                                    addView(Button(context).apply {
-//                                        text = "拷贝结果"
-//                                        setTextColor(ThemeManager.activeTheme.keyTextColor)
-//                                        setOnClickListener {
-//                                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                                            val clip = ClipData.newPlainText("AI回答", answer)
-//                                            clipboard.setPrimaryClip(clip)
-////                                            Toast.makeText(context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
-//                                            resultPopup.dismiss()
-//                                            isAddPhrases = false
-//                                            isAddAIQuery = false
-//                                            initView(context)
-//                                            onSettingsMenuClick(SkbMenuMode.ClipBoard)
-//                                        }
-//                                    })
-//                                })
-//
-//                                // 显示 PopupWindow
-//                                resultPopup.showAtLocation(mEtAddPhrasesContent, Gravity.CENTER, 0, 0)
                             } else {
                                 Toast.makeText(context, "响应格式错误", Toast.LENGTH_SHORT).show()
+                                LogUtils.w(LogUtils.LogType.AI_QUERY, "AI查询响应格式错误: $responseBody")
                             }
                         } catch (e: Exception) {
                             Toast.makeText(context, "解析响应失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                            LogUtils.e(LogUtils.LogType.AI_QUERY, "解析AI查询响应失败", e)
                         }
                     }
                 }
@@ -963,16 +883,21 @@ class InputView(context: Context, service: ImeService) : LifecycleRelativeLayout
                     mEtAddPhrasesContent?.onKeyUp(keyCode, KeyEvent(KeyEvent.ACTION_UP, keyCode))
                 }
                 KeyEvent.KEYCODE_ENTER ->{
-                    println("isAddPhrases:$isAddPhrases")
-                    println("isAddAIQuery:$isAddAIQuery")
+                    LogUtils.i(LogUtils.LogType.AI_QUERY, "点击”完成“按钮")
                     isAddPhrases = false
                     if(!isAddAIQuery){
                         addPhrasesHandle()
-                    }
-                    isAddAIQuery = false
+                        isAddAIQuery = false
 
-                    initView(context)
-                    onSettingsMenuClick(SkbMenuMode.Phrases)
+                        initView(context)
+                        onSettingsMenuClick(SkbMenuMode.Phrases)
+
+                    }else{
+
+                        addAIQueryHandle()
+                        isAddAIQuery = false
+                    }
+
                 }
                 else -> {
                     val unicodeChar: Char = KeyEvent(KeyEvent.ACTION_DOWN, keyCode).unicodeChar.toChar()

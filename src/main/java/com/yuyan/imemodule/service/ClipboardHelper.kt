@@ -19,12 +19,12 @@ object ClipboardHelper : OnPrimaryClipChangedListener {
     fun init() {
         try {
             if (!isInitialized) {
-                LogUtils.Companion.i(LogUtils.LogType.CLIPBOARD, "初始化剪贴板监听器")
+                LogUtils.Companion.i(LogUtils.LogType.CLIPBOARD, "注册剪贴板监听器")
                 ImeSdkApplication.context.clipboardManager.addPrimaryClipChangedListener(this)
                 isInitialized = true
             }
         } catch (e: Exception) {
-            LogUtils.Companion.e(LogUtils.LogType.CLIPBOARD, "初始化剪贴板监听器失败", e)
+            LogUtils.Companion.e(LogUtils.LogType.CLIPBOARD, "注册剪贴板监听器失败", e)
         }
     }
 

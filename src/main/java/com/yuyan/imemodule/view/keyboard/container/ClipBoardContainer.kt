@@ -50,7 +50,7 @@ class ClipBoardContainer(context: Context, inputView: InputView) : BaseContainer
     private var itemMode:SkbMenuMode? = null
 
     init {
-        LogUtils.Companion.d(LogUtils.LogType.CLIPBOARD, "初始化剪贴板容器")
+        LogUtils.Companion.d(LogUtils.LogType.CLIPBOARD, "打开剪贴板容器")
         mPaint.textSize = dp(22f)
         initView(context)
     }

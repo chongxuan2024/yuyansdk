@@ -61,10 +61,10 @@ class KnowledgeManagementActivity : AppCompatActivity() {
         supportActionBar?.title = "知识库管理"
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_knowledge_management, menu)
-        return true
-    }
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        menuInflater.inflate(R.menu.menu_knowledge_management, menu)
+//        return true
+//    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -72,10 +72,10 @@ class KnowledgeManagementActivity : AppCompatActivity() {
                 finish()
                 true
             }
-            R.id.action_log_management -> {
-                startActivity(LogManagementActivity.createIntent(this))
-                true
-            }
+//            R.id.action_log_management -> {
+//                startActivity(LogManagementActivity.createIntent(this))
+//                true
+//            }
             else -> super.onOptionsItemSelected(item)
         }
     }

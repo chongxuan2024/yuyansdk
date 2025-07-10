@@ -10,6 +10,7 @@ import androidx.navigation.NavDeepLinkBuilder
 import com.yuyan.imemodule.R
 import com.yuyan.imemodule.ui.activity.SettingsActivity
 import com.yuyan.imemodule.ui.knowledge.KnowledgeManagementActivity
+import com.yuyan.imemodule.utils.LogUtils
 import kotlin.system.exitProcess
 
 object AppUtil {
@@ -21,6 +22,7 @@ object AppUtil {
     }
 
     fun lauchknowledge(context: Context){
+        LogUtils.i(LogUtils.LogType.KNOWLEDGE_BASE, "开始启动知识库页面startActivity")
         context.startActivity<KnowledgeManagementActivity> {
            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
         }
