@@ -47,13 +47,14 @@ open class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        val appBarConfiguration = AppBarConfiguration(
-            // always show back icon regardless of `navController.currentDestination`
-            topLevelDestinationIds = setOf()
-        )
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment?
         navController = navHostFragment!!.navController
 
+        // 设置顶级目的地，包含主设置页面ID，这样主页面就不会显示返回按钮
+        val appBarConfiguration = AppBarConfiguration(
+            topLevelDestinationIds = setOf(R.id.settingsFragment)
+        )
+        
         binding.toolbar.setupWithNavController(navController, appBarConfiguration)
         binding.toolbar.setNavigationOnClickListener {
             // prevent navigate up when child fragment has enabled `OnBackPressedCallback`
