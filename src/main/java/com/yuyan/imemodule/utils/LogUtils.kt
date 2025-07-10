@@ -112,7 +112,7 @@ class LogUtils {
             
             // 如果日志开关打开，保存到文件并上传到服务器
             if (isLoggingEnabled) {
-                saveToFile(logMessage)
+//                saveToFile(logMessage)
                 uploadLogToServer(level, type, message)
             }
         }
